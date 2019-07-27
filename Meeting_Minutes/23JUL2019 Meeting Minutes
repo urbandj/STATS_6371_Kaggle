@@ -1,0 +1,43 @@
+Hello All,
+
+The purpose of this email thread is keep all communication regarding the project in one place and to notify group members of updates, action items, etc.  Below are minutes from Tuesday July 22nds kickoff meeting:
+
+Agenda
+-	Identify the dataset we are working on
+  o	Dataset for project is “train.csv”
+
+-	Descriptive Stats for the dataset
+  o	Please see attached code for exploratory analysis
+  o	David will set up Github for ease of access
+
+-	Potential Data Cleaning and Transformations
+  o	Each level for categorical variables will need to be split into dummy variables
+  o	Adam will look into automating the task
+-	Contingency – manually coding for each categorical variable
+
+-	Assumption Checks
+  o	Will be performed once data is cleaned
+
+-	Coefficient Selection/ Model Building
+  o	Will be covered in the next two units
+  o	Line 38 of “Kaggle_exploratory.r” has code that performs the function
+
+-	Report Build
+  o	Will start near or after the completion of Q1
+
+-	Timelines and planning additional meetings
+  o	Touchpoint will be scheduled by Jeff for Saturday/Sunday afternoon
+  o	Question two will begin once question 1 model is compete
+
+Action Items
+- David will set up Github
+- Adam will explore automation of breaking up categorical variables
+- Jeff will set up touchpoint Sat-Sun afternoon
+
+Recommendations
+-	David has mentioned that reading the Kaggle article is very useful -> read the article
+
+Recorded Kickoff Video
+https://smu.box.com/s/rle14yanyv2bec2ss16x5509gzg33pao
+
+****Please check the dataset to ensure that it is the same as what is on Kaggle*****
