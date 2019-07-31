@@ -1,33 +1,59 @@
 #Question 1
 library(dplyr)
+install.packages('mefa4')
+library('mefa4')
 
-#get rid out potential outliers
-century21_nol = century21 %>% 
-  filter(GrLivArea < 3200) %>%
-  filter(SalePrice < 300000)
+#Create subset with neighborhoods of interest----
+century21 = train %>% 
+  filter(Neighborhood %in% c('NAmes','Edwards','BrkSide')) %>%
+  mutate(logLotArea = log(LotArea)) %>% 
+  mutate(logGrLivArea = log(GrLivArea)) %>%
+  mutate(logSalePrice = log(SalePrice)) %>%
+  as_tibble()
 
-#Check for linearity - see if transformation is worth it, or outlier removal
+#create index column
+century21$index = seq.int(nrow(century21))
+
+#Create specific subsets for each model with given cook-d outliers removed----
+century21_linlin = century21 %>%
+  filter(index %notin% outliers_linlin)
+
+century21_linlog = century21 %>%
+  filter(index %notin% outliers_linlog)
+
+century21_loglin = century21 %>%
+  filter(index %notin% outliers_loglin)
+
+century21_loglog = century21 %>%
+  filter(index %notin% outliers_loglog)
+
+
+View(outliers_linlin)
+test=na.omit(century21_nol)
+#Check for linearity - see if transformation is worth it----
 par(mfrow=c(2,4))
 plot(century21$GrLivArea,century21$SalePrice, main = "Linear-Linear")
 plot(century21$GrLivArea,century21$logSalePrice, main = "Linear-log")
 plot(century21$logGrLivArea,century21$SalePrice, main = "Log-Linear")
 plot(century21$logGrLivArea,century21$logSalePrice,main = "Log-Log")
 
-plot(century21_nol$GrLivArea,century21_nol$SalePrice, main = "Linear-Linear NOL")
-plot(century21_nol$GrLivArea,century21_nol$logSalePrice, main = "Linear-log NOL")
-plot(century21_nol$logGrLivArea,century21_nol$SalePrice, main = "Log-Linear NOL")
-plot(century21_nol$logGrLivArea,century21_nol$logSalePrice,main = "Log-Log NOL")
+#plots with cooks distance outliers removed
+plot(century21_linlin$GrLivArea,century21_linlin$SalePrice, main = "Linear-Linear NOL")
+plot(century21_linlog$GrLivArea,century21_linlog$logSalePrice, main = "Linear-log NOL")
+plot(century21_loglin$logGrLivArea,century21_loglin$SalePrice, main = "Log-Linear NOL")
+plot(century21_loglog$logGrLivArea,century21_loglog$logSalePrice,main = "Log-Log NOL")
 
-#All models
+
+#Models----
 prices_linlin = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21)
 prices_linlog = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21)
 prices_loglin = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21)
 prices_loglog = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21)
 
-prices_linlin_nol = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21_nol)
-prices_linlog_nol = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21_nol)
-prices_loglin_nol = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21_nol)
-prices_loglog_nol = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21_nol)#best model
+prices_linlin_nol = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21_linlin)
+prices_linlog_nol = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21_linlog)
+prices_loglin_nol = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21_loglin)
+prices_loglog_nol = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21_loglog)#best model
 
 #Model Summaries
 summary(prices_linlin)
@@ -36,37 +62,55 @@ summary(prices_loglin)
 summary(prices_loglog)
 
 print("Transformed Models")
-
 summary(prices_linlin_nol)
 summary(prices_linlog_nol)
 summary(prices_loglin_nol)
-summary(prices_loglog_nol) #produces best model
+summary(prices_loglog_nol) #produces best model 0.523
 
 
-#outlier detection
+
+#outlier detection----
 install.packages('olsrr')
 install.packages('rlang')
 library('rlang')
 library('olsrr')
 
-ols_plot_cooksd_bar
-ols_plot_cooksd_bar(prices_loglog)
+#put cooks plot into object
+o_linlin = ols_plot_cooksd_bar(prices_linlin)
+o_linlog = ols_plot_cooksd_bar(prices_linlog)
+o_loglin = ols_plot_cooksd_bar(prices_loglin)
+o_loglog = ols_plot_cooksd_bar(prices_loglog)
+
+#pull outliers out of cooks plot object above
+outliers_linlin = o_linlin[["outliers"]][["observation"]]
+outliers_linlog = o_linlog[["outliers"]][["observation"]]
+outliers_loglin = o_loglin[["outliers"]][["observation"]]
+outliers_loglog = o_loglog[["outliers"]][["observation"]]
+
+#check to see what's inside
+o_loglin[["outliers"]][["observation"]]
+
+
+#confidence intervals----
 confint(prices_loglog_nol)
 
-#residual plot
+
+#AssumptionChecks----
+
+#residual
 res=resid(prices_loglog_nol)
-plot(century21_nol$logGrLivArea, res,
-     ylab="Residuals", xlab="logGrLivArea", 
-     main="logGrLivArea Residual Plot") 
+plot(century21_loglog$logGrLivArea, res,
+     ylab="Residuals", xlab="prices_linlog_nol", 
+     main="prices_linlog_nol Residual Plot") 
 abline(0, 0, col = 'red')    
 
 
 #studentized resid
 library(MASS)
 sresid <- studres(prices_loglog_nol)
-plot(century21_nol$logGrLivArea, sresid,
-     ylab="Studentized Residuals", xlab="logGrLivArea", 
-     main="logGrLivArea Studentized Residual Plot") 
+plot(century21_loglog$logGrLivArea, sresid,
+     ylab="Studentized Residuals", xlab="prices_linlog_nol", 
+     main="prices_linlog_nol Studentized Residual Plot") 
 abline(2, 0, col = 'red')    
 abline(-2, 0, col = 'red')    
 
@@ -81,5 +125,5 @@ yfit<-dnorm(xfit)
 lines(xfit, yfit) 
 
 #qqplot
-qqnorm(sresid)
-qqline(sresid, col = "steelblue", lwd = 2)
+qqnorm(res)
+qqline(res, col = "steelblue", lwd = 2)
