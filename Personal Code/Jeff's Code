@@ -1,0 +1,85 @@
+#Question 1
+library(dplyr)
+
+#get rid out potential outliers
+century21_nol = century21 %>% 
+  filter(GrLivArea < 3200) %>%
+  filter(SalePrice < 300000)
+
+#Check for linearity - see if transformation is worth it, or outlier removal
+par(mfrow=c(2,4))
+plot(century21$GrLivArea,century21$SalePrice, main = "Linear-Linear")
+plot(century21$GrLivArea,century21$logSalePrice, main = "Linear-log")
+plot(century21$logGrLivArea,century21$SalePrice, main = "Log-Linear")
+plot(century21$logGrLivArea,century21$logSalePrice,main = "Log-Log")
+
+plot(century21_nol$GrLivArea,century21_nol$SalePrice, main = "Linear-Linear NOL")
+plot(century21_nol$GrLivArea,century21_nol$logSalePrice, main = "Linear-log NOL")
+plot(century21_nol$logGrLivArea,century21_nol$SalePrice, main = "Log-Linear NOL")
+plot(century21_nol$logGrLivArea,century21_nol$logSalePrice,main = "Log-Log NOL")
+
+#All models
+prices_linlin = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21)
+prices_linlog = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21)
+prices_loglin = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21)
+prices_loglog = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21)
+
+prices_linlin_nol = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21_nol)
+prices_linlog_nol = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21_nol)
+prices_loglin_nol = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21_nol)
+prices_loglog_nol = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21_nol)#best model
+
+#Model Summaries
+summary(prices_linlin)
+summary(prices_linlog)
+summary(prices_loglin)
+summary(prices_loglog)
+
+print("Transformed Models")
+
+summary(prices_linlin_nol)
+summary(prices_linlog_nol)
+summary(prices_loglin_nol)
+summary(prices_loglog_nol) #produces best model
+
+
+#outlier detection
+install.packages('olsrr')
+install.packages('rlang')
+library('rlang')
+library('olsrr')
+
+ols_plot_cooksd_bar
+ols_plot_cooksd_bar(prices_loglog)
+confint(prices_loglog_nol)
+
+#residual plot
+res=resid(prices_loglog_nol)
+plot(century21_nol$logGrLivArea, res,
+     ylab="Residuals", xlab="logGrLivArea", 
+     main="logGrLivArea Residual Plot") 
+abline(0, 0, col = 'red')    
+
+
+#studentized resid
+library(MASS)
+sresid <- studres(prices_loglog_nol)
+plot(century21_nol$logGrLivArea, sresid,
+     ylab="Studentized Residuals", xlab="logGrLivArea", 
+     main="logGrLivArea Studentized Residual Plot") 
+abline(2, 0, col = 'red')    
+abline(-2, 0, col = 'red')    
+
+
+#resid hist
+library(MASS)
+resid <- studres(prices_loglog_nol)
+hist(resid, freq=FALSE,
+     main="Distribution of Residuals")
+xfit<-seq(min(resid),max(resid),length=40)
+yfit<-dnorm(xfit)
+lines(xfit, yfit) 
+
+#qqplot
+qqnorm(sresid)
+qqline(sresid, col = "steelblue", lwd = 2)
