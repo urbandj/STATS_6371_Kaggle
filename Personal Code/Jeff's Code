@@ -11,25 +11,7 @@ century21 = train %>%
   mutate(logSalePrice = log(SalePrice)) %>%
   as_tibble()
 
-#create index column
-century21$index = seq.int(nrow(century21))
 
-#Create specific subsets for each model with given cook-d outliers removed----
-century21_linlin = century21 %>%
-  filter(index %notin% outliers_linlin)
-
-century21_linlog = century21 %>%
-  filter(index %notin% outliers_linlog)
-
-century21_loglin = century21 %>%
-  filter(index %notin% outliers_loglin)
-
-century21_loglog = century21 %>%
-  filter(index %notin% outliers_loglog)
-
-
-View(outliers_linlin)
-test=na.omit(century21_nol)
 #Check for linearity - see if transformation is worth it----
 par(mfrow=c(2,4))
 plot(century21$GrLivArea,century21$SalePrice, main = "Linear-Linear")
@@ -37,36 +19,18 @@ plot(century21$GrLivArea,century21$logSalePrice, main = "Linear-log")
 plot(century21$logGrLivArea,century21$SalePrice, main = "Log-Linear")
 plot(century21$logGrLivArea,century21$logSalePrice,main = "Log-Log")
 
-#plots with cooks distance outliers removed
-plot(century21_linlin$GrLivArea,century21_linlin$SalePrice, main = "Linear-Linear NOL")
-plot(century21_linlog$GrLivArea,century21_linlog$logSalePrice, main = "Linear-log NOL")
-plot(century21_loglin$logGrLivArea,century21_loglin$SalePrice, main = "Log-Linear NOL")
-plot(century21_loglog$logGrLivArea,century21_loglog$logSalePrice,main = "Log-Log NOL")
 
-
-#Models----
+#Initial Models----
 prices_linlin = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21)
 prices_linlog = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21)
 prices_loglin = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21)
 prices_loglog = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21)
 
-prices_linlin_nol = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21_linlin)
-prices_linlog_nol = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21_linlog)
-prices_loglin_nol = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21_loglin)
-prices_loglog_nol = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21_loglog)#best model
-
-#Model Summaries
+#Inital Model Summaries
 summary(prices_linlin)
 summary(prices_linlog)
 summary(prices_loglin)
 summary(prices_loglog)
-
-print("Transformed Models")
-summary(prices_linlin_nol)
-summary(prices_linlog_nol)
-summary(prices_loglin_nol)
-summary(prices_loglog_nol) #produces best model 0.523
-
 
 
 #outlier detection----
@@ -90,6 +54,42 @@ outliers_loglog = o_loglog[["outliers"]][["observation"]]
 #check to see what's inside
 o_loglin[["outliers"]][["observation"]]
 
+
+#Create specific subsets for each model with given cook-d outliers removed----
+#create index column
+century21$index = seq.int(nrow(century21))
+
+century21_linlin = century21 %>%
+  filter(index %notin% outliers_linlin)
+
+century21_linlog = century21 %>%
+  filter(index %notin% outliers_linlog)
+
+century21_loglin = century21 %>%
+  filter(index %notin% outliers_loglin)
+
+century21_loglog = century21 %>%
+  filter(index %notin% outliers_loglog)
+
+
+#plots with cooks distance outliers removed----
+plot(century21_linlin$GrLivArea,century21_linlin$SalePrice, main = "Linear-Linear NOL")
+plot(century21_linlog$GrLivArea,century21_linlog$logSalePrice, main = "Linear-log NOL")
+plot(century21_loglin$logGrLivArea,century21_loglin$SalePrice, main = "Log-Linear NOL")
+plot(century21_loglog$logGrLivArea,century21_loglog$logSalePrice,main = "Log-Log NOL")
+
+
+#models without outliers----
+prices_linlin_nol = lm(SalePrice ~ Neighborhood + GrLivArea, data = century21_linlin)
+prices_linlog_nol = lm(SalePrice ~ Neighborhood + logGrLivArea, data = century21_linlog)
+prices_loglin_nol = lm(logSalePrice ~ Neighborhood + GrLivArea, data = century21_loglin)
+prices_loglog_nol = lm(logSalePrice ~ Neighborhood + logGrLivArea, data = century21_loglog)#best model
+
+#Outliers Removed - Summaries
+summary(prices_linlin_nol)
+summary(prices_linlog_nol)
+summary(prices_loglin_nol)
+summary(prices_loglog_nol) #produces best model 0.523
 
 #confidence intervals----
 confint(prices_loglog_nol)
