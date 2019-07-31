@@ -1,0 +1,36 @@
+Hello Everyone,
+
+Below are the minutes from our meeting this evening
+
+Agenda
+-	Compare model outputs and write-ups for Q1
+o	It was determined that the Log-Log variation produced the best results
+o	There are several outliers that are present – Cook’s D is tentatively the tool we will use to identify and remove outliers
+-	Begin/Share results from explanatory analysis of the dataset for Q2
+o	Will begin this item on Friday, time permitting
+Recommendations
+
+Reannan
+•	For question 2 considering school district, and/or income would be beneficial
+•	10 coefficients is generally a good number of coefficients
+•	Interaction terms ie. garage*kitchen
+
+David
+•	Following code generates useful assumption check plots without writing too many lines of code
+
+sale_price
+summary(sale_price)
+par(mfrow=c(1,2))
+plot(sale_price, which=1)
+plot(sale_price, which=2)
+plot(sale_price, which=3)
+plot(sale_price, which=4)
+plot(sale_price, which=2,1)
+Action Items
+	All - Check code used to generate the subset of houses from the three neighborhoods (~120 and 383 were generated)
+	All - After identifying correct filtering method, check for NA’s/ complete cases
+	Jeff – find way to adjust cooks distance threshold for ols_plot_cooksd_bar() function
+Meeting Recording
+https://smu.box.com/s/nahx9ecq2ancxc0gdl2abu12hluvlolb
+See you all on Friday!
+Jeff
