@@ -1,0 +1,139 @@
+library(tangram)
+library(car)
+library(fastDummies)
+
+#import dataset
+train <- read_csv("C:/Users/Jeff Nguyen/Desktop/DS6371 Statistical Foundations/Kaggle/train.csv")
+
+
+
+#filter out based on Analaysis 1 Requirements----
+names(train)
+century21 = train %>% 
+  mutate(logLotArea = log(LotArea)) %>% 
+  mutate(logGrLivArea = log(GrLivArea)) %>%
+  mutate(logSalePrice = log(SalePrice)) %>%
+  as_tibble()
+
+train(table$Neighborhood)
+train = dummy_cols(century21)
+#century21_d = dplyr::select(test,20,21,81:300)
+view(century21_d)
+names(century21_d)
+
+#Get tables for all categorical variables----
+cat_DF <- train[, sapply(train, is.categorical)]
+lapply(cat_DF, function(x) table(x, useNA="ifany"))
+
+#Get summary statistics----
+century21_d %>% glimpse
+train %>% skim
+
+attach(century21_d)
+
+hist(EnclosedPorch)
+MSSubClass#log transform
+LotFrontage#log transform
+LotArea#log transform
+OverallQual#categorical?, slightly skewed
+OverallCond#categorical?, slightly skewed
+YearBuilt 
+YearRemodAdd#??? two peaks 
+MasVnrArea#skewed logtransform
+BsmtFinSF1# log transform
+BsmtFinSF2 #transform
+BsmtUnfSF#right skew
+TotalBsmtSF # right skew
+`1stFlrSF`#right
+`2ndFlrSF`#right
+LowQualFinSF#???
+GrLivArea# right skew
+BedroomAbvGr# convert to categorical 
+KitchenAbvGr# convert to categorical
+TotRmsAbvGrd #convert to categorical??? otherwise right skew
+Fireplaces #convert to categorical
+GarageYrBlt# roughly normal
+GarageArea #categorical?
+WoodDeckSF #right skew
+OpenPorchSF #right skew
+EnclosedPorch #right skew
+`3SsnPorch`#???
+PoolArea #???
+MiscVal#???
+MoSold #roughtly normal
+YrSold # convert to categorical?
+BsmtUnfSF# right skew
+
+
+#correlation matrix----#need to clean data for correlation plot
+names(century21_d)
+corr_check = century21_d %>% select(2,4,5,18:21,26,27,35:39,44:47,60,63,68,69,77,78)
+names(corr_check)
+corr_check = corr_check %>% select(1:7,9,10,12:24)
+
+cor(corr_check)
+install.packages('corrplot')
+library(corrplot)
+corrplot(corr_check)
+
+#model construction (current model is for exploratory purposes)----
+homePrice = lm(SalePrice ~  Neighborhood + YearBuilt + logLotArea + logGrLivArea + CentralAir + YearRemodAdd + HouseStyle + PoolArea + KitchenAbvGr + Street +
+                 MSZoning + LotShape  + BldgType + RoofStyle + Exterior1st + ExterCond + Foundation + Heating + Electrical, data = century21)
+homePrice = lm(SalePrice ~., data = test2)
+
+test = lm(formula = SalePrice ~ Neighborhood + YearBuilt + logLotArea + 
+            logGrLivArea + CentralAir + YearRemodAdd + HouseStyle + KitchenAbvGr + 
+            MSZoning + LotShape + Exterior1st + ExterCond, data = century21)
+
+test2=lm(formula = SalePrice ~ Neighborhood + YearBuilt + logLotArea + 
+     logGrLivArea + CentralAir + YearRemodAdd + HouseStyle + PoolArea + 
+     KitchenAbvGr + Street + MSZoning + LotShape + BldgType + 
+     RoofStyle + Exterior1st + ExterCond + Foundation + Heating + 
+     Electrical, data = century21)
+
+step(homePrice)
+stepAIC(homePrice,direction = "forward")
+?stepAIC()
+vif(homePrice)
+summary(test2)
+
+#Model Selection----
+library(MASS)
+stepAIC(homePrice, direction = "both", trace = FALSE)
+
+#or use step()
+
+houseprice2 = lm(formula = SalePrice ~ YearBuilt + YearRemodAdd + logLotArea + 
+                   logGrLivArea + MSZoning_RL + Street_Pave + Alley_NA + Alley_Pave + 
+                   LotShape_IR2 + LandContour_HLS + LotConfig_Inside + LotConfig_FR2 + 
+                   LandSlope_Gtl + LandSlope_Mod + Neighborhood_BrkSide + Neighborhood_NAmes + 
+                   Condition1_Norm + Condition1_Feedr + Condition1_PosA + Condition2_Artery + 
+                   Condition2_Norm + Condition2_RRNn + Condition2_Feedr + BldgType_2fmCon + 
+                   BldgType_Duplex + HouseStyle_1.5Unf + HouseStyle_1Story + 
+                   HouseStyle_SLvl + HouseStyle_2Story + HouseStyle_2.5Unf + 
+                   RoofStyle_Gable + RoofStyle_Hip + RoofStyle_Mansard + RoofStyle_Gambrel + 
+                   RoofMatl_CompShg + `RoofMatl_Tar&Grv` + RoofMatl_WdShngl + 
+                   RoofMatl_Roll + Exterior1st_MetalSd + `Exterior1st_Wd Sdng` + 
+                   Exterior1st_BrkFace + Exterior1st_VinylSd + Exterior1st_AsbShng + 
+                   Exterior1st_BrkComm + Exterior2nd_MetalSd + Exterior2nd_Plywood + 
+                   Exterior2nd_BrkFace + Exterior2nd_HdBoard + Exterior2nd_Stucco + 
+                   Exterior2nd_AsphShn + Exterior2nd_AsbShng + MasVnrType_None + 
+                   MasVnrType_BrkCmn +Foundation_BrkTil + Foundation_CBlock + 
+                   Foundation_PConc + Foundation_Slab + BsmtQual_TA + BsmtQual_NA + 
+                   BsmtQual_Gd + BsmtQual_Fa + BsmtCond_Fa + BsmtExposure_No + 
+                   BsmtExposure_Gd + BsmtFinType1_GLQ + BsmtFinType1_Unf + BsmtFinType1_ALQ + 
+                   Heating_GasW + HeatingQC_Ex + Electrical_SBrkr + KitchenQual_TA + 
+                   KitchenQual_Gd + KitchenQual_Fa + Functional_Typ + Functional_Min1 + 
+                   Functional_Maj1 + Functional_Mod + Functional_Min2 + Functional_Maj2 + 
+                    GarageType_NA + GarageType_BuiltIn + GarageFinish_RFn + 
+                   GarageFinish_Unf + GarageQual_Fa + GarageCond_Gd + PoolQC_Ex + 
+                   Fence_GdPrv + MiscFeature_NA + MiscFeature_Shed + MiscFeature_Gar2 + 
+                   SaleType_New + SaleCondition_Normal + SaleCondition_Abnorml + 
+                   SaleCondition_AdjLand + SaleCondition_Family + GarageType_CarPort, 
+                 data = test2)
+summary(houseprice2)
+
+#Other Variables typed out to save time----
+#Alley - BsmtCond - BsmtExposure - BsmtFinType1 - BsmtFinType2 - BsmtQual - Fence - FireplaceQu - GarageCond - GarageFinish - GarageQual - GarageType - MiscFeature - PoolQC
+
+#Residual Checks (To be completed once model is built)----
