@@ -68,8 +68,8 @@ plot(test_sale_price, which=4)
 
 
 
-#tired to filter based on ranges but did see any improvemenets  GO ahead an adjust the ranges   you can visualize 
-#with plot and run the lm modle
+#tired to filter based on ranges but did NOT see any improvemenets  GO ahead an adjust the ranges   you can visualize 
+#with plot and run the lm model
 FilterNBH <- NBH %>% filter(logGrLivArea >= 6.5 & logGrLivArea <= 8  & logPrice >11)
 
 
@@ -79,7 +79,7 @@ str(FilterNBH)
 filter_price<-lm( data = FilterNBH, logPrice~logGrLivArea + Neighborhood + logGrLivArea*Neighborhood )
 summary(filter_price)
 
-# Indentifed outliers ,190,104,339,131,
+# Indentifed outliers ,190,104,339,131, 186
 
 
 
