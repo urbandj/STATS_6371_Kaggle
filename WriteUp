@@ -1,0 +1,52 @@
+Question 1 observations:
+
+After including sales price and using the “train” dataset we have collected information on the following neighborhoods: NAmes, Edwards, and BrkSide.  We are analyzing the significance of Living Area by square feet and the relationship to Sales Price in these three neighborhoods.  
+
+The data has been cleaned to remove any missing values in Sales Price, Living Area and Neighborhoods.  The interested output is 383 observations - NAmes has 225 observations, Edwards has 100 and BrkSide has 58 observations.
+
+The visual test of normality in a scatter plot shows a linear relationship between Living Area and Sales Price in the three neighborhoods referenced above but there are other other assumptions that must be considered.
+
+Prior to removing outliers we transformed each variable and performed additional scatter plots for each scenario.  The lin-lin model shows a positive linear relationship, however there are outliers that have influence and leverage on the best fit.  The best visual model is a transformed model where Sales Price and Living Area are both transformed.  The R^2 for log-log is still rather insignificant at 48.5%, meaning the variation of Sales Price can be explained by 45% of Living Area.  Many of the outliers fall in the Edwards neighborhood - either by a single price or a few homes that greater than the mean.
+
+
+Prior to removing outliers, let’s look at the residual plots.  Data is clustered near the right in the center and appears normal with a few outliers.  After removing the outliers the R^2 improved to 52.6%.  The residuals plots transformed and removing outliers also improved.  We can see the cluster still centered with minimal outliers having leverage or influence.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The Studentized histogram also confirms the normality of the data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Linearity is met with the Sales Price and Living Area both being transformed for homes in the NAmes, Edwards and BrkSide neighborhoods.  
