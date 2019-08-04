@@ -29,13 +29,18 @@ quest1 %>% filter(Neighborhood  %in% c('NAmes','Edwards','BrkSide'))->NBH
 table(NBH$logGrLivArea)
 sum(complete.cases(NBH))
 
+
 # generate the log for each of the contuious data columns SEE THE LOG per 100sq ft
+NBH$GrLivArea
+per100sqft <-(NBH$GrLivArea)/100
+per100sqft
 logper100sqft <- log(per100sqft)
+logper100sqft
 logGrLivArea <-log(NBH$GrLivArea)
 logPrice <- log(NBH$SalePrice)
-
+logPrice
 # join the logged tranformed to the NBH dataframe and confirm df
-LogNBH<-cbind(logGrLivArea,logPrice,)
+LogNBH<-cbind(logGrLivArea,logPrice)
 LogNBH
 NBH <- cbind(NBH, LogNBH)
 str(NBH)
@@ -68,8 +73,9 @@ plot(test_sale_price, which=4)
 
 
 
-#tired to filter based on ranges but did NOT see any improvemenets  GO ahead an adjust the ranges   you can visualize 
-#with plot and run the lm model
+#tired to filter based on ranges but did not see any improvemenets  GO ahead an adjust the ranges   you can visualize 
+#with plot and run the lm modle
+
 FilterNBH <- NBH %>% filter(logGrLivArea >= 6.5 & logGrLivArea <= 8  & logPrice >11)
 
 
@@ -79,7 +85,7 @@ str(FilterNBH)
 filter_price<-lm( data = FilterNBH, logPrice~logGrLivArea + Neighborhood + logGrLivArea*Neighborhood )
 summary(filter_price)
 
-# Indentifed outliers ,190,104,339,131, 186
+# Indentifed outliers ,190,104,339,131,
 
 
 
@@ -122,7 +128,3 @@ yfit <- (dnorm(xfit))
 
 ##Add the normal curve
 lines(xfit, yfit, ylim=c(0,0.5))
-
-
-
-
