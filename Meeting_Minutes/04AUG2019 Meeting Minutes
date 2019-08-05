@@ -18,3 +18,9 @@ Action Items
 sing <- sing %>% 
   mutate(Gender = factor(Female, levels=c(0,1), labels=c("Male", "Female")),
          JobType = factor(Job, levels=c("SupportServices", "Academic", "Professional")))
+	 
+Video Recordings
+Part 1
+https://smu.box.com/s/q06p8gsur100yfxqcwk15obl8103s06k
+Part 2
+https://smu.box.com/s/rziik4l62jh9idsjdtidey6x7f9aci0t
