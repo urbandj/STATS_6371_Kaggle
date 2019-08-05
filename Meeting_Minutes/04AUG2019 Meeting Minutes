@@ -1,0 +1,20 @@
+Agenda 
+- Share Write-ups
+	- Adam and Reannan have write-up prepared for pre/post model
+  - Adam will merge reports
+- Go over data wrangling
+	Base Level
+	- Poorest or worst level will be designated as base level
+
+Action Items
+- Adam: will handle data merging
+- Reannan: will continue data wrangling
+- David: will continue data wrangling
+- Jeff: get code to David to set order of factorized variables
+- Jeff: Post template on Git for Adam et al to build off of
+- Jeff: Work on code to center the model?
+
+#code to set levels of categorical variables
+sing <- sing %>% 
+  mutate(Gender = factor(Female, levels=c(0,1), labels=c("Male", "Female")),
+         JobType = factor(Job, levels=c("SupportServices", "Academic", "Professional")))
