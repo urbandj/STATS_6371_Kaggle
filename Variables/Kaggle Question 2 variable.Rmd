@@ -1,0 +1,149 @@
+---
+title: "Kaggle Question 2 variables"
+author: "David Julovich"
+date: "8/4/2019"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+library(ggplot2)
+
+train2<- read.csv("c:/Users/daj0079/Desktop/SMU/train.csv")
+#str(train2)
+ncol(train2)
+#trainRM<- c(1:21)
+trainDJ<-train2 [,c(22:43)]
+#trainAR <-c(44:66)
+#trainJN <-c(67:81)
+dj_dum<-trainDJ
+#str(dj_dum)
+SalePrice<-train2[,81]
+dj_dum<-cbind(SalePrice,dj_dum)
+#str(dj_dum)
+
+
+
+#sale price per neighborhood
+#set quality best measure 1,2,3,4, etc
+
+#table(dj_dum$RoofStyle)
+ggplot(data = dj_dum, aes(x=RoofStyle, y=SalePrice, color= RoofStyle))+geom_point(stat ="identity")
+#RoofStyleFactor<-as.factor(dj_dum$RoofStyle)
+#hist(table(RoofStyleFactor), freq=TRUE, xlab = levels(RoofStyleFactor), ylab = "Frequencies")
+
+ggplot(data = dj_dum, aes(x=dj_dum$RoofMatl, y=SalePrice, color= RoofMatl))+geom_point(stat ="identity")
+ggplot(data = dj_dum, aes(x=dj_dum$Exterior1st, y=SalePrice, color= Exterior1st))+geom_point(stat ="identity")+coord_flip()
+ggplot(data = dj_dum, aes(x=dj_dum$Exterior2nd, y=SalePrice, color= Exterior2nd))+geom_point(stat ="identity")+coord_flip()
+#Masonry veneer type
+ggplot(data = dj_dum, aes(x=dj_dum$MasVnrType, y=SalePrice, color= MasVnrType))+geom_point(stat ="identity")+coord_flip()
+ggplot(data = dj_dum, aes(x=dj_dum$MasVnrArea, y=SalePrice, color= MasVnrType))+geom_point(stat ="identity")+coord_flip()
+
+#Exter Qual (Ordinal): Evaluates the quality of the material on the exterior 
+#Ex	Excellent
+#Gd	Good
+#TA	Average/Typical
+#Fa	Fair
+#Po	Poor
+ggplot(data = dj_dum, aes(x=dj_dum$ExterQual, y=SalePrice, color= ExterQual))+geom_point(stat ="identity")+coord_flip()
+
+#Exter Cond (Ordinal): Evaluates the present condition of the material on the exterior
+#Ex	Excellent
+#Gd	Good
+#TA	Average/Typical
+#Fa	Fair
+#Po	Poor
+ggplot(data = dj_dum, aes(x=dj_dum$ExterCond, y=SalePrice, color= ExterCond))+geom_point(stat ="identity")+coord_flip()
+
+ggplot(data = dj_dum, aes(x=dj_dum$Foundation, y=SalePrice, color= Foundation))+geom_point(stat ="identity")+coord_flip()
+
+#Bsmt Qual (Ordinal): Evaluates the height of the basement
+#Ex	Excellent (100+ inches)	
+#Gd	Good (90-99 inches)
+#TA	Typical (80-89 inches)
+#Fa	Fair (70-79 inches)
+#Po	Poor (<70 inches
+#NA	No Basement
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtQual, y=SalePrice, color= BsmtQual))+geom_point(stat ="identity")+coord_flip()
+
+#Bsmt Cond (Ordinal): Evaluates the general condition of the basement
+#Ex	Excellent
+#Gd	Good
+#TA	Typical - slight dampness allowed
+#Fa	Fair - dampness or some cracking or settling
+#Po	Poor - Severe cracking, settling, or wetness
+#NA	No Basement
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtCond, y=SalePrice, color= BsmtCond))+geom_point(stat ="identity")+coord_flip()
+
+#Bsmt Exposure	(Ordinal): Refers to walkout or garden level walls
+#Gd	Good Exposure
+#Av	Average Exposure (split levels or foyers typically score average or above)	
+#Mn	Mimimum Exposure
+#No	No Exposure
+#NA	No Basement
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtExposure, y=SalePrice, color= BsmtExposure))+geom_point(stat ="identity")+coord_flip()
+
+#BsmtFin Type 1	(Ordinal): Rating of basement finished area
+#GLQ	Good Living Quarters
+#ALQ	Average Living Quarters
+#BLQ	Below Average Living Quarters	
+#Rec	Average Rec Room
+#LwQ	Low Quality
+#Unf	Unfinshed
+#NA	No Basement
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtFinType1, y=SalePrice, color= BsmtFinType1))+geom_point(stat ="identity")+coord_flip()
+
+#BsmtFin SF 1 (Continuous): Type 1 finished square feet
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtFinSF1, y=SalePrice, color= BsmtFinType1))+geom_point(stat ="identity")+coord_flip()
+
+#BsmtFin Type 2	(Ordinal): Rating of basement finished area(if multiple types)
+#GLQ	Good Living Quarters
+#ALQ	Average Living Quarters
+#BLQ	Below Average Living Quarters	
+#Rec	Average Rec Room
+#LwQ	Low Quality
+#Unf	Unfinshed
+#NA	No Basement
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtFinType2, y=SalePrice, color= BsmtFinType2))+geom_point(stat ="identity")+coord_flip()
+
+#BsmtFinType 2	(Ordinal): Rating of basement finished area (if multiple types)
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtFinSF2, y=SalePrice, color= BsmtFinType2))+geom_point(stat ="identity")+coord_flip()
+
+#Bsmt Unf SF (Continuous): Unfinished square feet of basement area
+ggplot(data = dj_dum, aes(x=dj_dum$BsmtUnfSF, y=SalePrice, color= BsmtUnfSF))+geom_point(stat ="identity")+coord_flip()
+
+######IMPORTANT
+#Total Bsmt SF (Continuous): Total square feet of basement area
+ggplot(data = dj_dum, aes(x=dj_dum$TotalBsmtSF, y=SalePrice, color= TotalBsmtSF))+geom_point(stat ="identity")+coord_flip()
+
+
+#Heating	(Nominal): Type of heating
+#Floor	Floor Furnace
+#GasA	Gas forced warm air furnace
+#GasW	Gas hot water or steam heat
+#Grav	Gravity furnace	
+#OthW	Hot water or steam heat other than gas
+#Wall	Wall furnace
+ggplot(data = dj_dum, aes(x=dj_dum$Heating, y=SalePrice, color= Heating))+geom_point(stat ="identity")+coord_flip()
+
+#HeatingQC (Ordinal): Heating quality and condition
+#Ex	Excellent
+#Gd	Good
+#TA	Average/Typical
+#Fa	Fair
+#Po	Poor
+ggplot(data = dj_dum, aes(x=dj_dum$HeatingQC, y=SalePrice, color= HeatingQC))+geom_point(stat ="identity")+coord_flip()
+
+#Central Air (Nominal): Central air conditioning
+#N	No
+#Y	Yes
+ggplot(data = dj_dum, aes(x=dj_dum$CentralAir, y=SalePrice, color= CentralAir))+geom_point(stat ="identity")+coord_flip()
+
+
+#Electrical (Ordinal): Electrical system
+#SBrkr	Standard Circuit Breakers & Romex
+#FuseA	Fuse Box over 60 AMP and all Romex wiring (Average)	
+#FuseF	60 AMP Fuse Box and mostly Romex wiring (Fair)
+#FuseP	60 AMP Fuse Box and mostly knob & tube wiring (poor)
+#Mix	Mixed
+ggplot(data = dj_dum, aes(x=dj_dum$Electrical, y=SalePrice, color= Electrical))+geom_point(stat ="identity")+coord_flip()
+```
