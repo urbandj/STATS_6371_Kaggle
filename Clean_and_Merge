@@ -29,8 +29,60 @@ training_data = training_data %>%
   mutate(porch_yn = if_else((`3SsnPorch` == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>% #if a home has any features related to a porch then porch_yn = 1
   mutate(Fence_f = factor(Fence, levels=c("NA", "GdPrv", "GdWo","MnPrv","MnWw")))
 
+#WoodDeckSF Categorical Buckets from Quantitiative Data
+group_WoodDeckSF <- function(WoodDeckSF){
+  if (WoodDeckSF >= 0 & WoodDeckSF <= 100){
+    return('0-100SF')
+  }else if(WoodDeckSF > 100 & WoodDeckSF <= 200){
+    return('100-200SF')
+  }else if (WoodDeckSF > 200 & WoodDeckSF <= 300){
+    return('200-300SF')
+  }else if (WoodDeckSF > 300 & WoodDeckSF <=400){
+    return('300-400SF')
+  }else if (WoodDeckSF > 400){
+    return('> 400SF')
+  }
+}
+training_data$WoodDeckSF_group <- sapply(training_data$WoodDeckSF,group_WoodDeckSF)
+training_data$WoodDeckSF_group <- as.factor(training_data$WoodDeckSF_group)
 
-#Create Categorical Buckets from Quantitiative Data
+#OpenPorchSF Categorical Buckets from Quantitiative Data
+group_OpenPorchSF <- function(OpenPorchSF){
+  if (OpenPorchSF >= 0 & OpenPorchSF <= 50){
+    return('0-50SF')
+  }else if(OpenPorchSF > 50 & OpenPorchSF <= 100){
+    return('50-100SF')
+  }else if (OpenPorchSF > 100 & OpenPorchSF <= 150){
+    return('100-150SF')
+  }else if (OpenPorchSF > 150 & OpenPorchSF <=200){
+    return('150-200SF')
+  }else if (OpenPorchSF > 200){
+    return('> 200SF')
+  }
+}
+training_data$OpenPorchSF_group <- sapply(training_data$OpenPorchSF,group_OpenPorchSF)
+training_data$OpenPorchSF_group <- as.factor(training_data$OpenPorchSF_group)
+
+#EnclosedPorch Categorical Buckets from Quantitiative Data
+group_EnclosedPorch<- function(EnclosedPorch){
+  if (EnclosedPorch >= 0 & EnclosedPorch <= 50){
+    return('0-50SF')
+  }else if(EnclosedPorch > 50 & EnclosedPorch <= 100){
+    return('50-100SF')
+  }else if (EnclosedPorch > 100 & EnclosedPorch <= 150){
+    return('100-150SF')
+  }else if (EnclosedPorch > 150 & EnclosedPorch <=200){
+    return('150-200SF')
+  }else if (EnclosedPorch > 200){
+    return('> 200SF')
+  }
+}
+training_data$EnclosedPorch_group <- sapply(training_data$EnclosedPorch,group_EnclosedPorch)
+training_data$EnclosedPorch_group <- as.factor(training_data$EnclosedPorch_group)
+
+#24 Observations of 3SsnPorch, not good predictor
+
+#MiscVal Categorical Buckets from Quantitiative Data
 group_MiscVal <- function(MiscVal){
   if (MiscVal >= 0 & MiscVal <= 200){
     return('$0-$200')
