@@ -1,0 +1,73 @@
+install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang'))
+library(tidyverse) #general data wrangling tools
+library(skimr) #summary stats
+library(tangram) #has is.categorical() function, useful for creating tables
+library(car) # Regression tools
+library(fastDummies) # creates dummy variables
+library('rlang')
+library('olsrr')
+
+#create training data object, please refer to this variable when making modificaitons to the dataset----
+#'if reading from local source
+#'library(readr)
+#'train <- read_csv("C:/.../train.csv")
+#'View(train)
+
+training_data = train
+
+
+#Jeff's Data----
+
+training_jeff %>% select(61:81)
+
+hist(training_jeff$MiscVal)
+
+training_data = training_data %>% 
+  mutate(logSalePrice = log(SalePrice)) %>%
+  mutate(GarageCars_f = as.factor(training_data$GarageCars)) %>%
+  mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
+  mutate(porch_yn = if_else((`3SsnPorch` == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>% #if a home has any features related to a porch then porch_yn = 1
+  mutate(Fence_f = factor(Fence, levels=c("NA", "GdPrv", "GdWo","MnPrv","MnWw")))
+
+
+#Create Categorical Buckets from Quantitiative Data
+group_MiscVale <- function(MiscVale){
+  if (MiscVale >= 0 & MiscVale <= 12){
+    return('0-12 Month')
+  }else if(MiscVale > 12 & MiscVale <= 24){
+    return('12-24 Month')
+  }else if (MiscVale > 24 & MiscVale <= 48){
+    return('24-48 Month')
+  }else if (MiscVale > 48 & MiscVale <=60){
+    return('48-60 Month')
+  }else if (tenure > 60){
+    return('> 60 Month')
+  }
+}
+training_data$MiscVal_group <- sapply(training_data$MiscVale,group_MiscVale)
+training_data$MiscVal_group <- as.factor(training_data$MiscVal_group)
+
+#Convert NA Fence to "None"
+#convert MiscVale to categorical
+
+#'pool not good predictor, 7 cases with data
+#'MiscFeature not good predictor
+#'Interaction variables for porch
+#' porch_yn*3SsnPorch
+#' porch_yn*EnclosedPorch
+#' porch_yn*OpenPorchSF
+#' porch_yn*ScreenPorch
+
+
+
+#Adam's Data----
+
+#Reannan's Data----
+training_data_rea= training_data %>%select(1:21)
+training_data_rea %>% skim
+
+#training_data_rea$LotFrontage, create categorical categories: none, 50, 100, 150, 200+
+#Ally is poor predictor
+
+#David's Data----
+
