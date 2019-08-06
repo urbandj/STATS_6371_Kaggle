@@ -31,20 +31,20 @@ training_data = training_data %>%
 
 
 #Create Categorical Buckets from Quantitiative Data
-group_MiscVale <- function(MiscVale){
-  if (MiscVale >= 0 & MiscVale <= 12){
-    return('0-12 Month')
-  }else if(MiscVale > 12 & MiscVale <= 24){
-    return('12-24 Month')
-  }else if (MiscVale > 24 & MiscVale <= 48){
-    return('24-48 Month')
-  }else if (MiscVale > 48 & MiscVale <=60){
-    return('48-60 Month')
-  }else if (tenure > 60){
-    return('> 60 Month')
+group_MiscVal <- function(MiscVal){
+  if (MiscVal >= 0 & MiscVal <= 200){
+    return('$0-$200')
+  }else if(MiscVal > 200 & MiscVal <= 400){
+    return('$200-$400')
+  }else if (MiscVal > 400 & MiscVal <= 600){
+    return('$400-$600')
+  }else if (MiscVal > 600 & MiscVal <=800){
+    return('$600-$800')
+  }else if (MiscVal > 800){
+    return('> $800')
   }
 }
-training_data$MiscVal_group <- sapply(training_data$MiscVale,group_MiscVale)
+training_data$MiscVal_group <- sapply(training_data$MiscVal,group_MiscVal)
 training_data$MiscVal_group <- as.factor(training_data$MiscVal_group)
 
 #Convert NA Fence to "None"
