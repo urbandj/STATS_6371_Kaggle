@@ -1,11 +1,12 @@
-install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang'))
+install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang','roperators'))
 library(tidyverse) #general data wrangling tools
 library(skimr) #summary stats
 library(tangram) #has is.categorical() function, useful for creating tables
 library(car) # Regression tools
 library(fastDummies) # creates dummy variables
-library('rlang')
-library('olsrr')
+library(rlang)
+library(olsrr)
+library(roperators) #used to convert NAs to to different values
 
 #create training data object, please refer to this variable when making modificaitons to the dataset----
 #'if reading from local source
@@ -18,12 +19,14 @@ training_data = train
 
 #Jeff's Data----
 
+training_data$Fence %na<-% "None" #roperators package
+
 training_data = training_data %>% 
   mutate(logSalePrice = log(SalePrice)) %>%
   mutate(GarageCars_f = as.factor(training_data$GarageCars)) %>%
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
   mutate(porch_yn = if_else((`3SsnPorch` == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>% #if a home has any features related to a porch then porch_yn = 1
-  mutate(Fence_f = factor(Fence, levels=c("NA", "GdPrv", "GdWo","MnPrv","MnWw")))
+  mutate(Fence_f = factor(Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw")))
 
 #WoodDeckSF Categorical Buckets from Quantitiative Data
 group_WoodDeckSF <- function(WoodDeckSF){
