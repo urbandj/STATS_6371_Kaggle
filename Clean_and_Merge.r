@@ -18,10 +18,6 @@ training_data = train
 
 #Jeff's Data----
 
-training_jeff %>% select(61:81)
-
-hist(training_jeff$MiscVal)
-
 training_data = training_data %>% 
   mutate(logSalePrice = log(SalePrice)) %>%
   mutate(GarageCars_f = as.factor(training_data$GarageCars)) %>%
