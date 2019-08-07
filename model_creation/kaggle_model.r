@@ -121,6 +121,14 @@ stepAIC(new_model, direction = both)
 
 
 #Cross Validation
+#install.packages('forecast')
+library(forecast)
+
+cv(training_model_no)
+
+final_model = 
+
+#-OR----
 library(caret)
 
 # Define train control for k fold cross validation, will take a long time to run
