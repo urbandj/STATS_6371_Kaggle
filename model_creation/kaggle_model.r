@@ -93,7 +93,7 @@ abline(0, 0, col = 'red')
 
 #studentized resid
 sresid <- studres(new_model)
-plot(century21_loglog$logGrLivArea, sresid,
+plot(training_model_no$logGrLivArea, sresid,
      ylab="Studentized Residuals", xlab="prices_linlog_nol", 
      main="prices_linlog_nol Studentized Residual Plot") 
 abline(2, 0, col = 'red')    
@@ -116,8 +116,8 @@ qqline(res, col = "steelblue", lwd = 2)
 #model selection----
 
 #Stepwise and AIC methods
-step(training_model_no)
-stepAIC(training_model_no, direction = both)
+step(new_model)
+stepAIC(new_model, direction = both)
 
 
 #Cross Validation
@@ -126,9 +126,9 @@ library(caret)
 # Define train control for k fold cross validation, will take a long time to run
 train_control <- trainControl(method="cv", number=5)
 # Fit Naive Bayes Model
-cv_model <- train(logSalePrice~., data = training_model_no, trControl=train_control, method="nb")
+final_model <- train(logSalePrice~., data = training_model_no, trControl=train_control, method="nb")
 # Summarise Results
-print(cv_model)
+print(final_model)
 
 
 #Assumption Check on optimum model----
