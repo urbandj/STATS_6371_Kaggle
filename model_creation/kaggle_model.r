@@ -21,7 +21,7 @@ training_model = training_data %>%
 #Linearity Check----
 
 training_corr = training_model %>% 
-  select()
+  select()#select all quantitiative variables here
 
 training_corr%>% skim
 
