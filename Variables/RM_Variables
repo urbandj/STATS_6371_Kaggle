@@ -1,16 +1,26 @@
 
 library(ggplot2)
+library(RCurl)
+library(tidyverse)
+library(skimr)
+library(tangram)
+install.packages("binr")
+library(dummies)
+library(corrgram)
+library(binr)
+library(plyr)
+
 URLTrain <- getURL("https://raw.githubusercontent.com/urbandj/STATS_6371_Kaggle/master/train.csv")
 
 train2<- read.csv(text = URLTrain, sep = ',')
 str(train2)
 ncol(train2)
-trainRM<- train [,c(1:21)]
+trainRM <- train2 [,c(1:21)]
 str(trainRM)
 SalePrice<-train2[,81]
 
 
-##here are my 21 variables (ommitting "Stree", "Alley", "Utilities" and "Condition") each set to normalized levels for each variable denoted by normlevel= .n or bin= .b
+##here are my 21 variables each set to normalized levels for each variable denoted by normlevel= .n or bin= .b
 
 #MSSubClass Categorical Buckets from Quantitiative Data
 group_MSSubClass <- function(MSSubClass){
@@ -76,11 +86,31 @@ trainRM$LotArea_group <- sapply(trainRM$MSSubClass,group_LotArea)
 trainRM$LotArea_group <- as.factor(trainRM$LotArea_group)
 
 
+#Street
+#1=Grvl
+#2=Pave
+#StreetFactor%>% skim
+Street.n<-as.numeric(trainRM$Street)
+ggplot(data =trainRM, aes(x=trainRM$Street, y=SalePrice, color= Street))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=Street.n, y=SalePrice, color= Street))+geom_point(stat ="identity")
+
+
+#Alley
+#1=Grvl
+#2=Pave
+#3=NA
+#AlleyFactor%>% skim
+Alley.n<-as.numeric(trainRM$Alley)
+ggplot(data =trainRM, aes(x=trainRM$Alley, y=SalePrice, color= Alley))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=Alley.n, y=SalePrice, color= Alley))+geom_point(stat ="identity")
+
+
 #LotShape
 #1=Reg
 #2=IR1
 #3=IR2
 #4=IR3
+#LotShapeFactor%>% skim
 LotShape.n<-as.numeric(trainRM$LotShape)           
 ggplot(data = trainRM, aes(x=trainRM$LotShap, y=SalePrice, color= LotShape))+geom_point(stat ="identity")
 ggplot(data = trainRM, aes(x=LotShape.n, y=SalePrice, color= LotShape))+geom_point(stat ="identity")
@@ -91,9 +121,19 @@ ggplot(data = trainRM, aes(x=LotShape.n, y=SalePrice, color= LotShape))+geom_poi
 #2=HLS
 #3=Low
 #4=Lvl
+#LandContourFactor%>% skim
 LandContour.n<-as.numeric(trainRM$LandContour)
 ggplot(data = trainRM, aes(x=trainRM$LandContour, y=SalePrice, color= LandContour))+geom_point(stat ="identity")+coord_flip()
 ggplot(data = trainRM, aes(x=LandContour.n, y=SalePrice, color= LandContour))+geom_point(stat ="identity")
+
+
+#Utilities
+#1=AllPub
+#2=NoSeWa
+#UtilitiesFactor%>% skim
+Utilities.n<-as.numeric(trainRM$Utilities)
+ggplot(data = trainRM, aes(x=trainRM$Utilities, y=SalePrice, color= Utilities))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=Utilities.n, y=SalePrice, color= Utilities))+geom_point(stat ="identity")
 
 
 #LotConfig
@@ -102,6 +142,7 @@ ggplot(data = trainRM, aes(x=LandContour.n, y=SalePrice, color= LandContour))+ge
 #3=FR2
 #4=FR3
 #5=Inside
+#LotConfigFactor%>% skim
 LotConfig.n<-as.numeric(trainRM$LotConfig)
 ggplot(data =trainRM, aes(x=trainRM$LotConfig, y=SalePrice, color= LotConfig))+geom_point(stat ="identity")
 ggplot(data = trainRM, aes(x=LotConfig.n, y=SalePrice, color= LotConfig))+geom_point(stat ="identity")
@@ -111,6 +152,7 @@ ggplot(data = trainRM, aes(x=LotConfig.n, y=SalePrice, color= LotConfig))+geom_p
 #1=Gtl
 #2=Mod
 #3=Sev
+#LandSlopeFactor%>% skim
 LandSlope.n<-as.numeric(trainRM$LandSlope)
 ggplot(data =trainRM, aes(x=trainRM$LandSlope, y=SalePrice, color= LandSlope))+geom_point(stat ="identity")
 ggplot(data = trainRM, aes(x=LandSlope.n, y=SalePrice, color= LandSlope))+geom_point(stat ="identity")
@@ -142,6 +184,7 @@ ggplot(data = trainRM, aes(x=LandSlope.n, y=SalePrice, color= LandSlope))+geom_p
 #23=SWISU
 #24=Timber
 #25=Veenker
+#NeighborhoodFactor%>% skim
 Neighborhood.n<-as.numeric(trainRM$Neighborhood)
 ggplot(data = trainRM, aes(x=Neighborhood.n, y=SalePrice, color= Neighborhood))+geom_point(stat ="identity")+coord_flip()
 
@@ -156,9 +199,23 @@ ggplot(data = trainRM, aes(x=Neighborhood.n, y=SalePrice, color= Neighborhood))+
 #7=RRAn
 #8=RRNe
 #9=RRNn
+#Condition1Factor%>% skim
 Condition1.n<-as.numeric(trainRM$Condition1)
 ggplot(data = trainRM, aes(x=Condition1.n, y=SalePrice, color= Condition1))+geom_point(stat ="identity")+coord_flip()
 
+
+#Condition2
+#1=Artery
+#2=Feedr
+#3=Norm
+#4=PosA
+#5=PosN
+#6=RRAe
+#7=RRAn
+#8=RRNn
+#Condition2Factor%>% skim
+Condition2.n<-as.numeric(trainRM$Condition2)
+ggplot(data = trainRM, aes(x=Condition2.n, y=SalePrice, color= Condition2))+geom_point(stat ="identity")+coord_flip()
 
 
 #BldgType
@@ -167,6 +224,7 @@ ggplot(data = trainRM, aes(x=Condition1.n, y=SalePrice, color= Condition1))+geom
 #3=Duplex
 #4=Twhs
 #5=TwnhE
+#BldgTypeFactor%>% skim
 BldgType.n<-as.numeric(trainRM$BldgType)
 ggplot(data =trainRM, aes(x=trainRM$BldgType, y=SalePrice, color= BldgType))+geom_point(stat ="identity")
 ggplot(data = trainRM, aes(x=BldgType.n, y=SalePrice, color= BldgType))+geom_point(stat ="identity")
@@ -181,6 +239,7 @@ ggplot(data = trainRM, aes(x=BldgType.n, y=SalePrice, color= BldgType))+geom_poi
 #6=2Story
 #7=SFoyer
 #8=SLvl
+#HouseStyleFactor%>% skim
 HouseStyle.n<-as.numeric(trainRM$HouseStyle)
 ggplot(data =trainRM, aes(x=trainRM$HouseStyle, y=SalePrice, color= HouseStyle))+geom_point(stat ="identity")
 ggplot(data = trainRM, aes(x=HouseStyle.n, y=SalePrice, color= HouseStyle))+geom_point(stat ="identity")
@@ -197,6 +256,7 @@ ggplot(data = trainRM, aes(x=HouseStyle.n, y=SalePrice, color= HouseStyle))+geom
 #8=8
 #9=9
 #10=10
+#OverallQualFactor%>% skim
 OverallQual.n<-as.numeric(trainRM$OverallQual)
 ggplot(data = trainRM, aes(x=OverallQual.n, y=SalePrice, color= OverallQual))+geom_point(stat ="identity")
 
@@ -211,6 +271,7 @@ ggplot(data = trainRM, aes(x=OverallQual.n, y=SalePrice, color= OverallQual))+ge
 #7=7
 #8=8
 #9=9
+#OverallCondFactor%>% skim
 OverallCond.n<-as.numeric(trainRM$OverallCond)
 ggplot(data = trainRM, aes(x=OverallCond.n, y=SalePrice, color= OverallCond))+geom_point(stat ="identity")
 
