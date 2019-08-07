@@ -81,19 +81,21 @@ training_model_no = training_model %>%
 #Model outliers addressed----
 
 new_model = lm(logSalePrice~., data = training_model_no)#interaction terms will need to be added here
+summary(new_model)
+vif(mew_model)
 
 #Assumption Check New Model----
 #residual
 res=resid(new_model)
-plot(training_model_no$"INSERT EXPLAINATORY HERE", res,
+plot(training_model_no$"INSERT EXPLAINATORY HERE", res,#insert explanatory here or predicted value???
      ylab="Residuals", xlab="prices_linlog_nol", 
-     main="prices_linlog_nol Residual Plot") 
+     main="prices_linlog_nol Residual Plot")  #change title here
 abline(0, 0, col = 'red')    
 
 
 #studentized resid
 sresid <- studres(new_model)
-plot(training_model_no$logGrLivArea, sresid,
+plot(training_model_no$logGrLivArea, sresid,#change explanatory
      ylab="Studentized Residuals", xlab="prices_linlog_nol", 
      main="prices_linlog_nol Studentized Residual Plot") 
 abline(2, 0, col = 'red')    
