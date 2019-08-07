@@ -1,0 +1,255 @@
+
+library(ggplot2)
+URLTrain <- getURL("https://raw.githubusercontent.com/urbandj/STATS_6371_Kaggle/master/train.csv")
+
+train2<- read.csv(text = URLTrain, sep = ',')
+str(train2)
+ncol(train2)
+trainRM<- train [,c(1:21)]
+str(trainRM)
+SalePrice<-train2[,81]
+
+
+##here are my 21 variables (ommitting "Stree", "Alley", "Utilities" and "Condition") each set to normalized levels for each variable denoted by normlevel= .n or bin= .b
+
+#MSSubClass Categorical Buckets from Quantitiative Data
+group_MSSubClass <- function(MSSubClass){
+  if (MSSubClass >= 0 & MSSubClass <= 30){
+    return('0-30')
+  }else if(MSSubClass > 30 & MSSubClass <= 60){
+    return('30-60')
+  }else if (MSSubClass > 60 & MSSubClass <= 90){
+    return('60-90')
+  }else if (MSSubClass > 90 & MSSubClass <=110){
+    return('90-120')
+  }else if (MSSubClass > 110){
+    return('90-200')
+  }
+}
+trainRM$MSSubClass_group <- sapply(trainRM$MSSubClass,group_MSSubClass)
+trainRM$MSSubClass_group <- as.factor(trainRM$MSSubClass_group)
+
+
+#MSZoning
+#1=C (all)
+#2=FV
+#3=RH
+#4=RL
+#5=RM
+#MSZoningFactor%>% skim
+MSZoning.n<-as.numeric(trainRM$MSZoning)
+ggplot(data =trainRM, aes(x=trainRM$MSZoning, y=SalePrice, color= MSZoning))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=MSZoning.n, y=SalePrice, color= MSZoning))+geom_point(stat ="identity")
+
+
+#LotFrontage Categorical Buckets from Quantitiative Data
+group_LotFrontage <- function(LotFrontage){
+  if (LotFrontage >= 0 & LotFrontage <= 50){
+    return('0-50')
+  }else if(LotFrontage > 50 & LotFrontage <= 80){
+    return('50-80')
+  }else if (LotFrontage > 80 & LotFrontage <= 110){
+    return('80-110')
+  }else if (LotFrontage > 110 & LotFrontage < 140){
+    return('110-140')
+  }else if (LotFrontage > 140){
+    return('110-150')
+  }
+}
+trainRM$LotFrontage_group <- sapply(trainRM$LotFrontage,group_LotFrontage)
+trainRM$LotFrontage_group <- as.factor(trainRM$LotFrontage_group)
+
+
+#LotArea Categorical Buckets from Quantitiative Data
+group_LotArea <- function(LotArea){
+  if (LotArea >= 0 & LotArea <= 3000){
+    return('0-3000')
+  }else if(LotArea > 3000 & LotArea <= 6000){
+    return('3000-6000')
+  }else if (LotArea > 6000 & LotArea <= 9000){
+    return('6000-9000')
+  }else if (LotArea > 9000){
+    return('9000-1200000')
+  }
+}
+trainRM$LotArea_group <- sapply(trainRM$MSSubClass,group_LotArea)
+trainRM$LotArea_group <- as.factor(trainRM$LotArea_group)
+
+
+#LotShape
+#1=Reg
+#2=IR1
+#3=IR2
+#4=IR3
+LotShape.n<-as.numeric(trainRM$LotShape)           
+ggplot(data = trainRM, aes(x=trainRM$LotShap, y=SalePrice, color= LotShape))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=LotShape.n, y=SalePrice, color= LotShape))+geom_point(stat ="identity")
+
+
+#LandContour
+#1=Bnk
+#2=HLS
+#3=Low
+#4=Lvl
+LandContour.n<-as.numeric(trainRM$LandContour)
+ggplot(data = trainRM, aes(x=trainRM$LandContour, y=SalePrice, color= LandContour))+geom_point(stat ="identity")+coord_flip()
+ggplot(data = trainRM, aes(x=LandContour.n, y=SalePrice, color= LandContour))+geom_point(stat ="identity")
+
+
+#LotConfig
+#1=Corner
+#2=CulDSac
+#3=FR2
+#4=FR3
+#5=Inside
+LotConfig.n<-as.numeric(trainRM$LotConfig)
+ggplot(data =trainRM, aes(x=trainRM$LotConfig, y=SalePrice, color= LotConfig))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=LotConfig.n, y=SalePrice, color= LotConfig))+geom_point(stat ="identity")
+
+
+#LandSlope
+#1=Gtl
+#2=Mod
+#3=Sev
+LandSlope.n<-as.numeric(trainRM$LandSlope)
+ggplot(data =trainRM, aes(x=trainRM$LandSlope, y=SalePrice, color= LandSlope))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=LandSlope.n, y=SalePrice, color= LandSlope))+geom_point(stat ="identity")
+
+
+#Neighborhood
+#1=Blmngtn
+#2=Blueste
+#3=BrDale
+#4=BrkSide
+#5=ClearCr
+#6=CollgCr
+#7=CrawFor
+#8=Edwards
+#9=Gilbert
+#10=IDOTRR
+#11=MeadowV
+#12=Mitchel
+#13=NAmes
+#14=NoRidge
+#15=NPKVil
+#16=NridgHt
+#17=NWAmes
+#18=OldTown
+#19=Sawyer
+#20=SawyerW
+#21=Somerst
+#22=StonBr
+#23=SWISU
+#24=Timber
+#25=Veenker
+Neighborhood.n<-as.numeric(trainRM$Neighborhood)
+ggplot(data = trainRM, aes(x=Neighborhood.n, y=SalePrice, color= Neighborhood))+geom_point(stat ="identity")+coord_flip()
+
+
+#Condition1
+#1=Artery
+#2=Feedr
+#3=Norm
+#4=PosA
+#5=PosN
+#6=RRAe
+#7=RRAn
+#8=RRNe
+#9=RRNn
+Condition1.n<-as.numeric(trainRM$Condition1)
+ggplot(data = trainRM, aes(x=Condition1.n, y=SalePrice, color= Condition1))+geom_point(stat ="identity")+coord_flip()
+
+
+
+#BldgType
+#1=1Fam
+#2=2fmCon
+#3=Duplex
+#4=Twhs
+#5=TwnhE
+BldgType.n<-as.numeric(trainRM$BldgType)
+ggplot(data =trainRM, aes(x=trainRM$BldgType, y=SalePrice, color= BldgType))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=BldgType.n, y=SalePrice, color= BldgType))+geom_point(stat ="identity")
+
+
+#HouseStyle
+#1=1.5Fin
+#2=1.5Unf
+#3=1Story
+#4=2.5Fin
+#5=2.5Unf
+#6=2Story
+#7=SFoyer
+#8=SLvl
+HouseStyle.n<-as.numeric(trainRM$HouseStyle)
+ggplot(data =trainRM, aes(x=trainRM$HouseStyle, y=SalePrice, color= HouseStyle))+geom_point(stat ="identity")
+ggplot(data = trainRM, aes(x=HouseStyle.n, y=SalePrice, color= HouseStyle))+geom_point(stat ="identity")
+
+
+#OverallQual
+#1=1
+#2=2
+#3=3
+#4=4
+#5=5
+#6=6
+#7=7
+#8=8
+#9=9
+#10=10
+OverallQual.n<-as.numeric(trainRM$OverallQual)
+ggplot(data = trainRM, aes(x=OverallQual.n, y=SalePrice, color= OverallQual))+geom_point(stat ="identity")
+
+
+#OverallCond
+#1=1
+#2=2
+#3=3
+#4=4
+#5=5
+#6=6
+#7=7
+#8=8
+#9=9
+OverallCond.n<-as.numeric(trainRM$OverallCond)
+ggplot(data = trainRM, aes(x=OverallCond.n, y=SalePrice, color= OverallCond))+geom_point(stat ="identity")
+
+
+##Binned variable
+#YearBuilt.b 
+#1=1870-1900 
+#2=1901-1930
+#3=1931-1960
+#4=1961-1990
+#5=1991-2011
+YearBuilt.n<-as.numeric(trainRM$YearBuilt)
+YearBuilt.n [is.na(YearBuilt.n)] <- 0
+sum(is.na(YearBuilt.n))
+ybbin<-c(1900,1930,1960,1990,2011)
+YearBuilt.b <-.bincode(YearBuilt.n,ybbin, right = TRUE,include.lowest = FALSE)
+YearBuilt.b  [is.na(YearBuilt.b )] <- 0
+ggplot(data = trainRM, aes(x=trainRM$YearBuilt, y=SalePrice, color= YearBuilt))+geom_point(stat ="identity")+coord_flip()
+ggplot(data = trainRM, aes(x=YearBuilt.b , y=SalePrice, color= YearBuilt))+geom_point(stat ="identity")
+
+
+##Binned variable
+#YearRemodAdd.b 
+#1=1950-1960
+#2=1961-1970
+#3=1971-1980
+#4=1981-1990
+#5=1991-2000
+#6=2001+
+YearRemodAdd.n<-as.numeric(trainRM$YearRemodAdd)
+YearRemodAdd.n [is.na(YearRemodAdd.n)] <- 0
+sum(is.na(YearRemodAdd.n))
+yrabin<-c(1960,1970,1980,1990,2000,2012)
+YearRemodAdd.b <-.bincode(YearRemodAdd.n,yrabin, right = TRUE,include.lowest = FALSE)
+YearRemodAdd.b  [is.na(YearRemodAdd.b )] <- 0
+ggplot(data = trainRM, aes(x=trainRM$YearRemodAdd, y=SalePrice, color= YearRemodAdd))+geom_point(stat ="identity")+coord_flip()
+ggplot(data = trainRM, aes(x=YearRemodAdd.b , y=SalePrice, color= YearRemodAdd))+geom_point(stat ="identity")
+
+
+
+
+
