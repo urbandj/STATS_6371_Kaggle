@@ -6,7 +6,7 @@ Adam:
 - consolidate graphs onto a separate file
 - export cleaned and merged data to csv and post on Git
 
-Daniel
+David
 - Tackle this portion of the requirements document:
 	"Specifically, you should produce 4 models: one from forward selection, 
 	 one from backwards elimination, one from stepwise selection, and one 
