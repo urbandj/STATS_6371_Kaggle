@@ -44,7 +44,7 @@ group_WoodDeckSF <- function(WoodDeckSF){
   }
 }
 training_data$WoodDeckSF_group <- sapply(training_data$WoodDeckSF,group_WoodDeckSF)
-training_data$WoodDeckSF_group <- as.factor(training_data$WoodDeckSF_group)
+training_data$WoodDeckSF_group <- factor(training_data$WoodDeckSF_group, levels = c("0-100SF","100-200SF","200-300SF","300-400SF","> 400SF"), ordered = TRUE)
 
 ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
 
@@ -64,7 +64,7 @@ group_OpenPorchSF <- function(OpenPorchSF){
   }
 }
 training_data$OpenPorchSF_group <- sapply(training_data$OpenPorchSF,group_OpenPorchSF)
-training_data$OpenPorchSF_group <- as.factor(training_data$OpenPorchSF_group)
+training_data$OpenPorchSF_group <- factor(training_data$OpenPorchSF_group,levels = c("0-50SF","50-100SF","100-150SF","150-200SF","> 200SF" ), ordered = TRUE)
 
 ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
 
@@ -84,8 +84,8 @@ group_EnclosedPorch<- function(EnclosedPorch){
   }
 }
 training_data$EnclosedPorch_group <- sapply(training_data$EnclosedPorch,group_EnclosedPorch)
-training_data$EnclosedPorch_group <- as.factor(training_data$EnclosedPorch_group)
-
+training_data$EnclosedPorch_group <- factor(training_data$EnclosedPorch_group, levels = c("0-50SF","50-100SF","100-150SF","150-200SF","> 200SF"), ordered = TRUE)
+levels(training_data$EnclosedPorch_group)
 ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #24 Observations of 3SsnPorch, not good predictor
@@ -105,8 +105,8 @@ group_MiscVal <- function(MiscVal){
   }
 }
 training_data$MiscVal_group <- sapply(training_data$MiscVal,group_MiscVal)
-training_data$MiscVal_group <- as.factor(training_data$MiscVal_group)
-
+training_data$MiscVal_group <- factor(training_data$MiscVal_group, levels = c("$0-$200","$200-$400","$400-$600","$600-$800","> $800"), ordered = TRUE)
+levels(training_data$MiscVal_group)
 ggplot(data = training_data, aes(x=MiscVal_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #Convert NA Fence to "None"
@@ -241,14 +241,14 @@ group_MSSubClass <- function(MSSubClass){
   }else if (MSSubClass > 60 & MSSubClass <= 90){
     return('60-90')
   }else if (MSSubClass > 90 & MSSubClass <=110){
-    return('90-120')
+    return('90-110')
   }else if (MSSubClass > 110){
-    return('90-200')
+    return('>110')
   }
 }
 training_data$MSSubClass_group <- sapply(training_data$MSSubClass,group_MSSubClass)
-training_data$MSSubClass_group <- as.factor(training_data$MSSubClass_group)
-
+training_data$MSSubClass_group <- factor(training_data$MSSubClass_group, levels = c('0-30','30-60','60-90','90-110','>110'), ordered = TRUE)
+levels(training_data$MSSubClass_group)
 
 #MSZoning
 #1=C (all)
@@ -263,6 +263,7 @@ ggplot(data = training_data, aes(x=MSZoning.n, y=SalePrice, color= MSZoning))+ge
 
 
 #LotFrontage Categorical Buckets from Quantitiative Data
+training_data$LotFrontage %na<-% 0
 group_LotFrontage <- function(LotFrontage){
   if (LotFrontage >= 0 & LotFrontage <= 50){
     return('0-50')
@@ -270,14 +271,15 @@ group_LotFrontage <- function(LotFrontage){
     return('50-80')
   }else if (LotFrontage > 80 & LotFrontage <= 110){
     return('80-110')
-  }else if (LotFrontage > 110 & LotFrontage < 140){
+  }else if (LotFrontage > 110 & LotFrontage <= 140){
     return('110-140')
   }else if (LotFrontage > 140){
-    return('110-150')
+    return('>140')
   }
 }
 training_data$LotFrontage_group <- sapply(training_data$LotFrontage,group_LotFrontage)
-training_data$LotFrontage_group <- as.factor(training_data$LotFrontage_group)
+training_data$LotFrontage_group <- factor(training_data$LotFrontage_group, levels = c('0-50','50-80','80-110','110-140','>140'), ordered = TRUE)
+levels(training_data$LotFrontage_group)
 
 
 #LotArea Categorical Buckets from Quantitiative Data
@@ -289,11 +291,12 @@ group_LotArea <- function(LotArea){
   }else if (LotArea > 6000 & LotArea <= 9000){
     return('6000-9000')
   }else if (LotArea > 9000){
-    return('9000-1200000')
+    return('>9000')
   }
 }
-training_data$LotArea_group <- sapply(training_data$MSSubClass,group_LotArea)
-training_data$LotArea_group <- as.factor(training_data$LotArea_group)
+training_data$LotArea_group <- sapply(training_data$LotArea,group_LotArea)
+training_data$LotArea_group <- factor(training_data$LotArea_group, levels = c('0-3000','3000-6000','6000-9000','>9000'), ordered = TRUE)
+ggplot(data = training_data, aes(x=training_data$LotArea_group, y=SalePrice, color= LotArea_group))+geom_point(stat ="identity")
 
 
 #LotShape
