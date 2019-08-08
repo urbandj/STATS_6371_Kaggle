@@ -1,0 +1,34 @@
+Action Items
+
+Adam: 
+- remove NAs from data
+- Considate merging and cleaning code onto one file
+- consolidate graphs onto a separate file
+- export cleaned and merged data to csv and post on Git
+
+Daniel
+- Tackle this portion of the requirements document:
+	"Specifically, you should produce 4 models: one from forward selection, 
+	 one from backwards elimination, one from stepwise selection, and one 
+	 that you build custom."  
+
+Jeff
+- Update master code to included factored data
+
+Reannan
+- Debug LotFrontage, LotArea
+
+
+Once Adam has the master training file on Git, we can all play with the model using the kaggle_model.r file
+
+Rename Variables
+training_data$Fence %na<-% "None" #roperators package
+
+export to CSV
+write.csv(training_data, file = "training_data.csv")
+
+Model Selection Article
+http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/154-stepwise-regression-essentials-in-r/
+
+Meeting Video
+https://smu.box.com/s/95wr12lvj1lae5nf7p9mgpns8wkx04vo
