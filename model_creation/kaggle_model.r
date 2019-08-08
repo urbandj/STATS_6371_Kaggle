@@ -116,10 +116,13 @@ qqnorm(res)
 qqline(res, col = "steelblue", lwd = 2)
 
 #model selection----
+#http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/154-stepwise-regression-essentials-in-r/
 
 #Stepwise and AIC methods
 step(new_model)
-stepAIC(new_model, direction = both)
+stepAIC(new_model, direction = "both")
+stepAIC(new_model, direction = "forwards")
+stepAIC(new_model, direction = "backwards")
 
 
 #Cross Validation
