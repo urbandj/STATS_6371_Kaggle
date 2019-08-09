@@ -18,12 +18,15 @@ training_data <- read.csv("//DS1513/AllData/Adam/SMU Data Science Courses/DS 637
 
 #Jeff's Data----
 
+training_data$Fence %na<-% "None" #roperators package
+
 training_data = training_data %>% 
   mutate(logSalePrice = log(SalePrice)) %>%
   mutate(GarageCars_f = as.factor(training_data$GarageCars)) %>%
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
-  mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>% #if a home has any features related to a porch then porch_yn = 1
-  mutate(Fence_f = factor(Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw")))
+  mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) #if a home has any features related to a porch then porch_yn = 1
+  
+training_data$Fence_f = factor(training_data$Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw"), ordered = TRUE)
 
 #WoodDeckSF Categorical Buckets from Quantitiative Data
 group_WoodDeckSF <- function(WoodDeckSF){
@@ -40,7 +43,10 @@ group_WoodDeckSF <- function(WoodDeckSF){
   }
 }
 training_data$WoodDeckSF_group <- sapply(training_data$WoodDeckSF,group_WoodDeckSF)
-training_data$WoodDeckSF_group <- as.factor(training_data$WoodDeckSF_group)
+training_data$WoodDeckSF_group <- factor(training_data$WoodDeckSF_group, levels = c("0-100SF","100-200SF","200-300SF","300-400SF","> 400SF"), ordered = TRUE)
+
+ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
+
 
 #OpenPorchSF Categorical Buckets from Quantitiative Data
 group_OpenPorchSF <- function(OpenPorchSF){
@@ -57,7 +63,10 @@ group_OpenPorchSF <- function(OpenPorchSF){
   }
 }
 training_data$OpenPorchSF_group <- sapply(training_data$OpenPorchSF,group_OpenPorchSF)
-training_data$OpenPorchSF_group <- as.factor(training_data$OpenPorchSF_group)
+training_data$OpenPorchSF_group <- factor(training_data$OpenPorchSF_group,levels = c("0-50SF","50-100SF","100-150SF","150-200SF","> 200SF" ), ordered = TRUE)
+
+ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
+
 
 #EnclosedPorch Categorical Buckets from Quantitiative Data
 group_EnclosedPorch<- function(EnclosedPorch){
@@ -74,7 +83,9 @@ group_EnclosedPorch<- function(EnclosedPorch){
   }
 }
 training_data$EnclosedPorch_group <- sapply(training_data$EnclosedPorch,group_EnclosedPorch)
-training_data$EnclosedPorch_group <- as.factor(training_data$EnclosedPorch_group)
+training_data$EnclosedPorch_group <- factor(training_data$EnclosedPorch_group, levels = c("0-50SF","50-100SF","100-150SF","150-200SF","> 200SF"), ordered = TRUE)
+levels(training_data$EnclosedPorch_group)
+ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #24 Observations of 3SsnPorch, not good predictor
 
@@ -93,10 +104,9 @@ group_MiscVal <- function(MiscVal){
   }
 }
 training_data$MiscVal_group <- sapply(training_data$MiscVal,group_MiscVal)
-training_data$MiscVal_group <- as.factor(training_data$MiscVal_group)
-
-#Convert NA Fence to "None"
-#convert MiscVale to categorical
+training_data$MiscVal_group <- factor(training_data$MiscVal_group, levels = c("$0-$200","$200-$400","$400-$600","$600-$800","> $800"), ordered = TRUE)
+levels(training_data$MiscVal_group)
+ggplot(data = training_data, aes(x=MiscVal_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #'pool not good predictor, 7 cases with data
 #'MiscFeature not good predictor
@@ -105,7 +115,6 @@ training_data$MiscVal_group <- as.factor(training_data$MiscVal_group)
 #' porch_yn*EnclosedPorch
 #' porch_yn*OpenPorchSF
 #' porch_yn*ScreenPorch
-
 
 
 #Adam's Data----
@@ -164,14 +173,13 @@ group_MSSubClass <- function(MSSubClass){
   }else if (MSSubClass > 60 & MSSubClass <= 90){
     return('60-90')
   }else if (MSSubClass > 90 & MSSubClass <=110){
-    return('90-120')
+    return('90-110')
   }else if (MSSubClass > 110){
-    return('90-200')
+    return('>110')
   }
 }
 training_data$MSSubClass_group <- sapply(training_data$MSSubClass,group_MSSubClass)
-training_data$MSSubClass_group <- as.factor(training_data$MSSubClass_group)
-
+training_data$MSSubClass_group <- factor(training_data$MSSubClass_group, levels = c('0-30','30-60','60-90','90-110','>110'), ordered = TRUE)
 
 #MSZoning
 #1=C (all)
