@@ -191,39 +191,40 @@ training_data$MSSubClass_group <- factor(training_data$MSSubClass_group, levels 
 MSZoning.n<-as.numeric(training_data$MSZoning)
 
 
-# training_data$LotFrontage %na<-% 0
-# #LotFrontage Categorical Buckets from Quantitiative Data
-# group_LotFrontage <- function(LotFrontage){
-#   if (LotFrontage >= 0 & LotFrontage <= 50){
-#     return('0-50')
-#   }else if(LotFrontage > 50 & LotFrontage <= 80){
-#     return('50-80')
-#   }else if (LotFrontage > 80 & LotFrontage <= 110){
-#     return('80-110')
-#   }else if (LotFrontage > 110 & LotFrontage < 140){
-#     return('110-140')
-#   }else if (LotFrontage > 140){
-#     return('110-150')
-#   }
-# }
-# training_data$LotFrontage_group <- sapply(training_data$LotFrontage,group_LotFrontage)
-# training_data$LotFrontage_group <- as.factor(training_data$LotFrontage_group)
+training_data$LotFrontage %na<-% 0
+group_LotFrontage <- function(LotFrontage){
+  if (LotFrontage >= 0 & LotFrontage <= 50){
+    return('0-50')
+  }else if(LotFrontage > 50 & LotFrontage <= 80){
+    return('50-80')
+  }else if (LotFrontage > 80 & LotFrontage <= 110){
+    return('80-110')
+  }else if (LotFrontage > 110 & LotFrontage <= 140){
+    return('110-140')
+  }else if (LotFrontage > 140){
+    return('>140')
+  }
+}
+training_data$LotFrontage_group <- sapply(training_data$LotFrontage,group_LotFrontage)
+training_data$LotFrontage_group <- factor(training_data$LotFrontage_group, levels = c('0-50','50-80','80-110','110-140','>140'), ordered = TRUE)
+levels(training_data$LotFrontage_group)
 
-# 
-# #LotArea Categorical Buckets from Quantitiative Data
-# group_LotArea <- function(LotArea){
-#   if (LotArea >= 0 & LotArea <= 3000){
-#     return('0-3000')
-#   }else if(LotArea > 3000 & LotArea <= 6000){
-#     return('3000-6000')
-#   }else if (LotArea > 6000 & LotArea <= 9000){
-#     return('6000-9000')
-#   }else if (LotArea > 9000){
-#     return('9000-1200000')
-#   }
-# }
-# training_data$LotArea_group <- sapply(training_data$MSSubClass,group_LotArea)
-# training_data$LotArea_group <- as.factor(training_data$LotArea_group)
+#LotArea Categorical Buckets from Quantitiative Data
+as.numeric(training_data$LotArea)
+group_LotArea <- function(LotArea){
+  if (LotArea >= 0 & LotArea <= 3000){
+    return('0-3000')
+  }else if(LotArea > 3000 & LotArea <= 6000){
+    return('3000-6000')
+  }else if (LotArea > 6000 & LotArea <= 9000){
+    return('6000-9000')
+  }else if (LotArea > 9000){
+    return('>9000')
+  }
+}
+training_data$LotArea_group <- sapply(training_data$LotArea,group_LotArea)
+training_data$LotArea_group <- factor(training_data$LotArea_group, levels = c('0-3000','3000-6000','6000-9000','>9000'), ordered = TRUE)
+ggplot(data = training_data, aes(x=training_data$LotArea_group, y=SalePrice, color= LotArea_group))+geom_point(stat ="identity")
 
 
 #LotShape
@@ -666,5 +667,18 @@ Electrical.n<-ifelse(training_data$Electrical=="Mix",1, ifelse(training_data$Ele
 Electrical.n  [is.na(Electrical.n)] <- 0
 training_data$Electrical.n <- Electrical.n
 
+
+training_data$GarageFinish %na<-% "None"
+training_data$GarageQual %na<-% "None"
+training_data$FireplaceQu %na<-% "None"
+training_data$Electrical %na<-% "None"
+training_data$MasVnrType %na<-% "None"
+training_data$BsmtExposure%na<-% "None"
+training_data$BsmtCond%na<-% "None"
+training_data$BsmtFinType1%na<-% "None"     
+training_data$BsmtFinType2%na<-% "None"    
+training_data$BsmtQual%na<-% "None"
+
+training_data %<>% mutate(logGrLivArea = log(GrLivArea))
 write.csv(training_data, file = "//DS1513/AllData/Adam/SMU Data Science Courses/DS 6371 Stats/Project/training_data.csv")
 
