@@ -667,7 +667,7 @@ Electrical.n<-ifelse(training_data$Electrical=="Mix",1, ifelse(training_data$Ele
 Electrical.n  [is.na(Electrical.n)] <- 0
 training_data$Electrical.n <- Electrical.n
 
-
+training_data$GarageYrBlt %na<-% 0 
 training_data$GarageFinish %na<-% "None"
 training_data$GarageQual %na<-% "None"
 training_data$FireplaceQu %na<-% "None"
