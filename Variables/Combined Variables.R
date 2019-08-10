@@ -8,6 +8,7 @@ library(rlang)
 library(olsrr)
 library(roperators) #used to convert NAs to to different values
 library(DAAG)
+library(ggplot2)
 #create training data object, please refer to this variable when making modificaitons to the dataset----
 #'if reading from local source
 #'library(readr)
@@ -21,93 +22,14 @@ training_data$Fence %na<-% "None" #roperators package
 
 training_data = training_data %>% 
   mutate(logSalePrice = log(SalePrice)) %>%
-  mutate(GarageCars_f = as.factor(training_data$GarageCars)) %>%
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
   mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) #if a home has any features related to a porch then porch_yn = 1
 
-training_data$Fence_f = factor(training_data$Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw"), ordered = TRUE)
-group_WoodDeckSF <- function(WoodDeckSF){
-  if (WoodDeckSF >= 0 & WoodDeckSF <= 100){
-    return('0-100SF')
-  }else if(WoodDeckSF > 100 & WoodDeckSF <= 200){
-    return('100-200SF')
-  }else if (WoodDeckSF > 200 & WoodDeckSF <= 300){
-    return('200-300SF')
-  }else if (WoodDeckSF > 300 & WoodDeckSF <=400){
-    return('300-400SF')
-  }else if (WoodDeckSF > 400){
-    return('> 400SF')
-  }
-}
-training_data$WoodDeckSF_group <- sapply(training_data$WoodDeckSF,group_WoodDeckSF)
-training_data$WoodDeckSF_group <- factor(training_data$WoodDeckSF_group, levels = c("0-100SF","100-200SF","200-300SF","300-400SF","> 400SF"), ordered = TRUE)
+training_data$Fence_f = factor(training_data$Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw"), ordered = FALSE)
 
-ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
-
-
-#OpenPorchSF Categorical Buckets from Quantitiative Data
-group_OpenPorchSF <- function(OpenPorchSF){
-  if (OpenPorchSF >= 0 & OpenPorchSF <= 50){
-    return('0-50SF')
-  }else if(OpenPorchSF > 50 & OpenPorchSF <= 100){
-    return('50-100SF')
-  }else if (OpenPorchSF > 100 & OpenPorchSF <= 150){
-    return('100-150SF')
-  }else if (OpenPorchSF > 150 & OpenPorchSF <=200){
-    return('150-200SF')
-  }else if (OpenPorchSF > 200){
-    return('> 200SF')
-  }
-}
-training_data$OpenPorchSF_group <- sapply(training_data$OpenPorchSF,group_OpenPorchSF)
-training_data$OpenPorchSF_group <- factor(training_data$OpenPorchSF_group,levels = c("0-50SF","50-100SF","100-150SF","150-200SF","> 200SF" ), ordered = TRUE)
-
-ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
-
-
-#EnclosedPorch Categorical Buckets from Quantitiative Data
-group_EnclosedPorch<- function(EnclosedPorch){
-  if (EnclosedPorch >= 0 & EnclosedPorch <= 50){
-    return('0-50SF')
-  }else if(EnclosedPorch > 50 & EnclosedPorch <= 100){
-    return('50-100SF')
-  }else if (EnclosedPorch > 100 & EnclosedPorch <= 150){
-    return('100-150SF')
-  }else if (EnclosedPorch > 150 & EnclosedPorch <=200){
-    return('150-200SF')
-  }else if (EnclosedPorch > 200){
-    return('> 200SF')
-  }
-}
-training_data$EnclosedPorch_group <- sapply(training_data$EnclosedPorch,group_EnclosedPorch)
-training_data$EnclosedPorch_group <- factor(training_data$EnclosedPorch_group, levels = c("0-50SF","50-100SF","100-150SF","150-200SF","> 200SF"), ordered = TRUE)
-levels(training_data$EnclosedPorch_group)
-ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity")
-
-#24 Observations of 3SsnPorch, not good predictor
-
-#MiscVal Categorical Buckets from Quantitiative Data
-group_MiscVal <- function(MiscVal){
-  if (MiscVal >= 0 & MiscVal <= 200){
-    return('$0-$200')
-  }else if(MiscVal > 200 & MiscVal <= 400){
-    return('$200-$400')
-  }else if (MiscVal > 400 & MiscVal <= 600){
-    return('$400-$600')
-  }else if (MiscVal > 600 & MiscVal <=800){
-    return('$600-$800')
-  }else if (MiscVal > 800){
-    return('> $800')
-  }
-}
-training_data$MiscVal_group <- sapply(training_data$MiscVal,group_MiscVal)
-training_data$MiscVal_group <- factor(training_data$MiscVal_group, levels = c("$0-$200","$200-$400","$400-$600","$600-$800","> $800"), ordered = TRUE)
-ggplot(data = training_data, aes(x=MiscVal_group, y=logSalePrice))+geom_point(stat ="identity")
-
-#Jeff updated----
 #WoodDeckSF Categorical Buckets from Quantitiative Data
 training_data$WoodDeckSF %na<-% 0
-training_data$WoodDeckSF_group<-cut(training_data$WoodDeckSF, c(0,100,200,300,400,900), ordered_result = TRUE, include.lowest = TRUE)
+training_data$WoodDeckSF_group<-cut(training_data$WoodDeckSF, c(0,100,200,300,400,900), ordered_result = FALSE, include.lowest = TRUE)
 table(training_data$WoodDeckSF_group)
 levels(training_data$WoodDeckSF_group)
 ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
@@ -115,30 +37,20 @@ ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point
 
 #OpenPorchSF Categorical Buckets from Quantitiative Data
 training_data$OpenPorchSF %na<-% 0
-training_data$OpenPorchSF_group<-cut(training_data$OpenPorchSF, c(0,50,100,150,200,550), ordered_result = TRUE, include.lowest = TRUE)
+training_data$OpenPorchSF_group<-cut(training_data$OpenPorchSF, c(0,50,100,150,200,550), ordered_result = FALSE, include.lowest = TRUE)
 ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
 hist(training_data$OpenPorchSF)
 
 #EnclosedPorch Categorical Buckets from Quantitiative Data
-training_data$EnclosedPorch_group<-cut(training_data$EnclosedPorch, c(0,50,100,150,200,600), ordered_result = TRUE, include.lowest = TRUE)
+training_data$EnclosedPorch_group<-cut(training_data$EnclosedPorch, c(0,50,100,150,200,600), ordered_result = FALSE, include.lowest = TRUE)
 ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #24 Observations of 3SsnPorch, not good predictor
-
-
 #'pool not good predictor, 7 cases with data
 #'MiscFeature not good predictor
-#'Interaction variables for porch
-#' porch_yn*3SsnPorch
-#' porch_yn*EnclosedPorch
-#' porch_yn*OpenPorchSF
-#' porch_yn*ScreenPorch
 
 
 #Adam's Data----
-
-# X2ndFlrSF/X1stFlrSF NO
-training_data$X2ndFlrSFDIV1st <- training_data$X2ndFlrSF/training_data$X1stFlrSF
 
 # USE THIS ONE !! Bath FullBath + (0.5 * HalfBath) RECODE to THREE PLUS
 training_data$TotalBath <- training_data$FullBath + (0.5 * training_data$HalfBath)
@@ -147,14 +59,15 @@ training_data$TotalBath <- training_data$FullBath + (0.5 * training_data$HalfBat
 training_data$BedroomAbvGr4plus <- ifelse(training_data$BedroomAbvGr >= 4, 4, training_data$BedroomAbvGr)  
 
 Qual4 <- c("Fa", "TA", "Gd", "Ex") # no "Po" data
-training_data$KitchenQual.Fac <- factor(x=training_data$KitchenQual, levels=Qual4, ordered = TRUE)
+training_data$KitchenQual.Fac <- factor(x=training_data$KitchenQual, levels=Qual4, ordered = FALSE)
 training_data$KitchenQual.FacNum <- as.numeric(training_data$KitchenQual.Fac)
 
 #POSSIBLE TotRmsAbvGrd MAY NEED TO RECODE FOR 10+
 training_data$TotRmsAbvGrd10plus <- ifelse(training_data$TotRmsAbvGrd >= 10, 10, training_data$TotRmsAbvGrd)  
 
 # Fireplaces
-training_data$FireplaceY <- ifelse(training_data$Fireplaces == 0, 0, 1)  
+training_data$Fireplaces = factor(training_data$Fireplaces, levels = c(0,1,3), ordered = FALSE)
+#training_data$FireplaceY <- ifelse(training_data$Fireplaces == 0, 0, 1)  
 
 # GarageType different values "2Types Attchd Basment BuiltIn CarPort Detchd"
 training_data$GarageType %na<-% "Detchd"
@@ -167,19 +80,21 @@ training_data$GarageYrBlt %na<-% 0
 
 # GarageCars recode Significant 0, 1, 2, 3+ 
 GarCar <- c(0, 1, 2, 3, 4) 
-training_data$GarageCars.Fac <- factor(x=training_data$GarageCars, levels=GarCar, ordered = TRUE)
-training_data$GarageCars3plus <- ifelse(training_data$GarageCars.Fac == 4, 3, training_data$GarageCars.Fac)  
-
+training_data$GarageCars <- factor(x=training_data$GarageCars, levels=GarCar, ordered = FALSE)
+levels(training_data$GarageCars)[levels(training_data$GarageCars) =="4"] ="3"
+GarCar1 <- c(0, 1, 2, 3) 
+training_data$GarageCars_f <- factor(x=training_data$GarageCars, levels=GarCar1, ordered = FALSE)
+levels(training_data$GarageCars_f)
 # GarageArea not as useful
 training_data$GarageCond %na<-% "TA"
 
 Qual5 <- c("Po", "Fa", "TA", "Gd", "Ex") 
-training_data$GarageCond.Fac <- factor(x=training_data$GarageCond, levels=Qual5, ordered = TRUE)
+training_data$GarageCond.Fac <- factor(x=training_data$GarageCond, levels=Qual5, ordered = FALSE)
 training_data$GarageCond.N <- as.numeric(training_data$GarageCond.Fac)
 
 # PavedDrive
 Pave <- c("N", "P", "Y") 
-training_data$PavedDrive.Fac <- factor(x=training_data$PavedDrive, levels=Pave, ordered = TRUE)
+training_data$PavedDrive.Fac <- factor(x=training_data$PavedDrive, levels=Pave, ordered = FALSE)
 
 # PavedDriveY POSSIBLE
 training_data$PavedDriveY <- ifelse(training_data$PavedDrive == "Y", 1, 0)  
@@ -187,21 +102,9 @@ training_data$PavedDriveY <- ifelse(training_data$PavedDrive == "Y", 1, 0)
 #Reannan's Data----
 
 #MSSubClass Categorical Buckets from Quantitiative Data
-group_MSSubClass <- function(MSSubClass){
-  if (MSSubClass >= 0 & MSSubClass <= 30){
-    return('0-30')
-  }else if(MSSubClass > 30 & MSSubClass <= 60){
-    return('30-60')
-  }else if (MSSubClass > 60 & MSSubClass <= 90){
-    return('60-90')
-  }else if (MSSubClass > 90 & MSSubClass <=110){
-    return('90-110')
-  }else if (MSSubClass > 110){
-    return('>110')
-  }
-}
-training_data$MSSubClass_group <- sapply(training_data$MSSubClass,group_MSSubClass)
-training_data$MSSubClass_group <- factor(training_data$MSSubClass_group, levels = c('0-30','30-60','60-90','90-110','>110'), ordered = TRUE)
+training_data$MSSubClass %na<-% 0
+training_data$MSSubClass_group<-cut(training_data$MSSubClass, c(0,30,60,90,110,200), ordered_result = FALSE, include.lowest = TRUE)
+ggplot(data = training_data, aes(x=MSSubClass_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #MSZoning
 #1=C (all)
@@ -213,27 +116,13 @@ training_data$MSSubClass_group <- factor(training_data$MSSubClass_group, levels 
 MSZoning.n<-as.numeric(training_data$MSZoning)
 
 table(training_data$Electrical)
-# training_data$LotFrontage %na<-% 0
+
 training_data$LotFrontage %na<-% 0
-group_LotFrontage <- function(LotFrontage){
-  if (LotFrontage >= 0 & LotFrontage <= 50){
-    return('0-50')
-  }else if(LotFrontage > 50 & LotFrontage <= 80){
-    return('50-80')
-  }else if (LotFrontage > 80 & LotFrontage <= 110){
-    return('80-110')
-  }else if (LotFrontage > 110 & LotFrontage <= 140){
-    return('110-140')
-  }else if (LotFrontage > 140){
-    return('>140')
-  }
-}
-training_data$LotFrontage_group <- sapply(training_data$LotFrontage,group_LotFrontage)
-training_data$LotFrontage_group <- factor(training_data$LotFrontage_group, levels = c('0-50','50-80','80-110','110-140','>140'), ordered = TRUE)
+training_data$LotFrontage_group = cut(training_data$LotFrontage, c(0,50,80,110,140,320), ordered_result = FALSE, include.lowest = TRUE)
+ggplot(data = training_data, aes(x=training_data$LotFrontage_group, y=logSalePrice))+geom_point(stat ="identity")
 levels(training_data$LotFrontage_group)
 
 #LotArea Categorical Buckets from Quantitiative Data
-as.numeric(training_data$LotArea)
 group_LotArea <- function(LotArea){
   if (LotArea >= 0 & LotArea <= 3000){
     return('0-3000')
@@ -246,121 +135,8 @@ group_LotArea <- function(LotArea){
   }
 }
 training_data$LotArea_group <- sapply(training_data$LotArea,group_LotArea)
-training_data$LotArea_group <- factor(training_data$LotArea_group, levels = c('0-3000','3000-6000','6000-9000','>9000'), ordered = TRUE)
+training_data$LotArea_group <- factor(training_data$LotArea_group, levels = c('0-3000','3000-6000','6000-9000','>9000'), ordered = FALSE)
 ggplot(data = training_data, aes(x=training_data$LotArea_group, y=SalePrice, color= LotArea_group))+geom_point(stat ="identity")
-
-
-#LotShape
-#1=Reg
-#2=IR1
-#3=IR2
-#4=IR3
-LotShape.n<-as.numeric(training_data$LotShape)           
-
-#LandContour
-#1=Bnk
-#2=HLS
-#3=Low
-#4=Lvl
-LandContour.n<-as.numeric(training_data$LandContour)
-
-#LotConfig
-#1=Corner
-#2=CulDSac
-#3=FR2
-#4=FR3
-#5=Inside
-LotConfig.n<-as.numeric(training_data$LotConfig)
-
-#LandSlope
-#1=Gtl
-#2=Mod
-#3=Sev
-LandSlope.n<-as.numeric(training_data$LandSlope)
-
-#Neighborhood
-#1=Blmngtn
-#2=Blueste
-#3=BrDale
-#4=BrkSide
-#5=ClearCr
-#6=CollgCr
-#7=CrawFor
-#8=Edwards
-#9=Gilbert
-#10=IDOTRR
-#11=MeadowV
-#12=Mitchel
-#13=NAmes
-#14=NoRidge
-#15=NPKVil
-#16=NridgHt
-#17=NWAmes
-#18=OldTown
-#19=Sawyer
-#20=SawyerW
-#21=Somerst
-#22=StonBr
-#23=SWISU
-#24=Timber
-#25=Veenker
-Neighborhood.n<-as.numeric(training_data$Neighborhood)
-
-#Condition1
-#1=Artery
-#2=Feedr
-#3=Norm
-#4=PosA
-#5=PosN
-#6=RRAe
-#7=RRAn
-#8=RRNe
-#9=RRNn
-Condition1.n<-as.numeric(training_data$Condition1)
-
-#BldgType
-#1=1Fam
-#2=2fmCon
-#3=Duplex
-#4=Twhs
-#5=TwnhE
-BldgType.n<-as.numeric(training_data$BldgType)
-
-#HouseStyle
-#1=1.5Fin
-#2=1.5Unf
-#3=1Story
-#4=2.5Fin
-#5=2.5Unf
-#6=2Story
-#7=SFoyer
-#8=SLvl
-HouseStyle.n<-as.numeric(training_data$HouseStyle)
-
-#OverallQual
-#1=1
-#2=2
-#3=3
-#4=4
-#5=5
-#6=6
-#7=7
-#8=8
-#9=9
-#10=10
-OverallQual.n<-as.numeric(training_data$OverallQual)
-
-#OverallCond
-#1=1
-#2=2
-#3=3
-#4=4
-#5=5
-#6=6
-#7=7
-#8=8
-#9=9
-OverallCond.n<-as.numeric(training_data$OverallCond)
 
 ##Binned variable
 #YearBuilt.b 
@@ -372,11 +148,13 @@ OverallCond.n<-as.numeric(training_data$OverallCond)
 YearBuilt.n<-as.numeric(training_data$YearBuilt)
 YearBuilt.n [is.na(YearBuilt.n)] <- 0
 sum(is.na(YearBuilt.n))
-ybbin<-c(1900,1930,1960,1990,2011)
-YearBuilt.b <-.bincode(YearBuilt.n,ybbin, right = TRUE,include.lowest = FALSE)
-YearBuilt.b  [is.na(YearBuilt.b )] <- 0
-training_data$YearBuilt.b <- YearBuilt.b
+ybbin<-c(0,1900,1930,1960,1990,2011)
+#YearBuilt.b <-.bincode(YearBuilt.n,ybbin, right = TRUE,include.lowest = FALSE)
+#YearBuilt.b  [is.na(YearBuilt.b )] <- 0
+#training_data$YearBuilt.b <- YearBuilt.b
 
+
+training_data$YearBuilt.b<-cut(training_data$YearBuilt, ybbin, ordered_result = FALSE, include.lowest = TRUE)
 
 ##Binned variable
 #YearRemodAdd.b 
@@ -386,13 +164,9 @@ training_data$YearBuilt.b <- YearBuilt.b
 #4=1981-1990
 #5=1991-2000
 #6=2001+
-YearRemodAdd.n<-as.numeric(training_data$YearRemodAdd)
-YearRemodAdd.n [is.na(YearRemodAdd.n)] <- 0
-sum(is.na(YearRemodAdd.n))
-yrabin<-c(1960,1970,1980,1990,2000,2012)
-YearRemodAdd.b <-.bincode(YearRemodAdd.n,yrabin, right = TRUE,include.lowest = FALSE)
-YearRemodAdd.b  [is.na(YearRemodAdd.b )] <- 0
-training_data$YearRemodAdd.b <- YearRemodAdd.b
+training_data$YearRemodAdd[is.na(training_data$YearRemodAdd)] <- 0
+yrabin<-c(0,1960,1970,1980,1990,2000,2012)
+training_data$YearRemodAdd.b<-cut(training_data$YearRemodAdd, yrabin, ordered = FALSE, include.lowest = TRUE)
 
 #David's Data----
 
@@ -406,61 +180,14 @@ training_data$YearRemodAdd.b <- YearRemodAdd.b
 RoofStyle.n<-as.numeric(training_data$RoofStyle)
 training_data$RoofStyleY <- ifelse(training_data$RoofStyle == 'Gable' | training_data$RoofStyle == 'Hip', 1, 0)  
 
-#1=ClyTile
-#2=CompShg
-#3=Membran
-#4=Metal
-#5=Roll
-#6=Tar&Grv
-#7=Wdshake
-#8=WdShngl
-training_data$RoofMatl.n<-as.numeric(training_data$RoofMatl)           
 
-
-#1=AsbShng  
-#2=AsphShn
-#3=BrkComm
-#4=BrkFace
-#5=CBlock
-#6=CemntBd
-#7=HdBoard
-#8=ImStucc
-#9=MetalSd
-#10=Plywood
-#11=Stone
-#12=stucco
-#13=VinylSf
-#14=WD Sdng
-#15=WDShing
-training_data$Exterior1st.n<-as.numeric(training_data$Exterior1st)
-
-#1=AsbShng  
-#2=AsphShn
-#3=Brk Cmn
-#4=BrkFace
-#5=CBlock
-#6=CemntBd
-#7=HdBoard
-#8=ImStucc
-#9=MetalSd
-#10=Other
-#11=Plywood
-#12=Stone
-#13=Stucco
-#14=VinylSd
-#15=Wd Sdng
-#16=Wd Shng
-training_data$Exterior2nd.n<-as.numeric(training_data$Exterior2nd)
-
-
-#0=N/A
+#0=None
 #1=BrkCmn  
 #2=BrkFace
 #3=None
 #4=Stone
-MasVnrType.n<-as.numeric(training_data$MasVnrType)
-MasVnrType.n[is.na(MasVnrType.n)] <- 0
-training_data$MasVnrType.n <- MasVnrType.n
+training_data$MasVnrType %na<-% "None"
+
 
 ##Binned variable
 #MasVnrArea.b 
@@ -568,13 +295,11 @@ training_data$BsmtFinType1.n <- BsmtFinType1.n
 #7=1501-1750
 #8=1751-2000
 #9=+2001
-BsmtFinSF1.n<-as.numeric(training_data$BsmtFinSF1)
-BsmtFinSF1.n[is.na(BsmtFinSF1.n)] <- 0
-sum(is.na(BsmtFinSF1.n))
+training_data$BsmtFinSF1[is.na(training_data$BsmtFinSF1)] <- 0
 BSMT1<-c(0,250,500,750,1000,1250, 1500, 1750,2000,6500)
-BsmtFinSF1.b<-.bincode(BsmtFinSF1.n,BSMT1, right = TRUE,include.lowest = FALSE)
-BsmtFinSF1.b[is.na(BsmtFinSF1.b)] <- 0
-training_data$BsmtFinSF1.b <- BsmtFinSF1.b
+training_data$BsmtFinSF1 = cut(training_data$BsmtFinSF1, BSMT1, ordered = FALSE, include.lowest = TRUE)
+training_data %>% skim
+plot(training_data$BsmtFinSF1)
 
 #interesting fact to look at total living area vs basement 
 #BsmtFin Type 2	(Ordinal): Rating of basement finished area(if multiple types)
@@ -599,13 +324,10 @@ training_data$BsmtFinType2.n <- BsmtFinType2.n
 #4=751-1000
 #5=1001-1250
 #6=1251-1500
-BsmtFinSF2.n<-as.numeric(training_data$BsmtFinSF2)
-BsmtFinSF2.n[is.na(BsmtFinSF2.n)] <- 0
-sum(is.na(BsmtFinSF2.n))
+training_data$BsmtFinSF2[is.na(training_data$BsmtFinSF2)] <- 0
 BSMT2<-c(0,250,500,750,1000,1250, 1500)
-BsmtFinSF2.b<-.bincode(BsmtFinSF2.n,BSMT2, right = TRUE,include.lowest = FALSE)
-BsmtFinSF2.b[is.na(BsmtFinSF2.b)] <- 0
-training_data$BsmtFinSF2.b <- BsmtFinSF2.b
+training_data$BsmtFinSF2 = cut(training_data$BsmtFinSF2, BSMT2, ordered = FALSE,include.lowest = TRUE)
+hist(training_model$BsmtFinSF2)
 
 #BINNED
 #Bsmt Unf SF (Continuous): Unfinished square feet of basement area
@@ -619,13 +341,11 @@ training_data$BsmtFinSF2.b <- BsmtFinSF2.b
 #7=1501-1750
 #8=1751-2000
 #9=+2001
-BsmtUnfSF.n<-as.numeric(training_data$BsmtUnfSF)
-BsmtUnfSF.n[is.na(BsmtUnfSF.n)] <- 0
-sum(is.na(BsmtUnfSF.n))
+
+training_data$BsmtUnfSF[is.na(training_data$BsmtUnfSF)] <- 0
+
 UNFBSMT<-c(0,250,500,750,1000,1250, 1500, 1750,2000,6500)
-BsmtUnfSF.b<-.bincode(BsmtUnfSF.n,UNFBSMT, right = TRUE,include.lowest = FALSE)
-BsmtUnfSF.b[is.na(BsmtUnfSF.b)] <- 0
-training_data$BsmtUnfSF.b <- BsmtUnfSF.b
+training_data$BsmtUnfSF = cut(training_data$BsmtFinSF1, UNFBSMT, ordered = FALSE,include.lowest = TRUE)
 
 ######IMPORTANT USE THIS ONE
 #Total Bsmt SF (Continuous): Total square feet of basement area
@@ -642,13 +362,11 @@ training_data$BsmtUnfSF.b <- BsmtUnfSF.b
 #10=2501-2750
 #11=2751-3000
 #12=+3000
-TotalBsmtSF.n<-as.numeric(training_data$TotalBsmtSF)
+
 TotalBsmtSF.n[is.na(TotalBsmtSF.n)] <- 0
-sum(is.na(TotalBsmtSF.n))
 TOTBSMT<-c(0,250,500,750,1000,1250, 1500, 1750,2000,2250,2500,2750,3000,7000)
-TotalBsmtSF.b<-.bincode(TotalBsmtSF.n,TOTBSMT, right = TRUE,include.lowest = FALSE)
-TotalBsmtSF.b[is.na(TotalBsmtSF.b)] <- 0
-training_data$TotalBsmtSF.b <- TotalBsmtSF.b
+training_model$TotalBsmtSF.b %na<-% 0
+training_data$TotalBsmtSF.b = factor(training_data$TotalBsmtSF.b, levels = TOTBSMT, ordered = FALSE)
 
 #Heating	(Nominal): Type of heating
 #1=Floor	Floor Furnace
@@ -704,6 +422,3 @@ training_data$BsmtFinType1%na<-% "None"
 training_data$BsmtFinType2%na<-% "None"    
 training_data$BsmtQual%na<-% "None"
 training_data %<>% mutate(logGrLivArea = log(GrLivArea))
-
-#Write Data to file
-#write.csv(training_data, file = "training_data.csv")
