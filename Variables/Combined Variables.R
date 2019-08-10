@@ -22,24 +22,27 @@ training_data$Fence %na<-% "None" #roperators package
 
 training_data = training_data %>% 
   mutate(logSalePrice = log(SalePrice)) %>%
-  mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
-  mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) #if a home has any features related to a porch then porch_yn = 1
+  mutate(pool_y = if_else(PoolArea > 0,1,0)) %>% #not good predictor, 7 cases with data
+  mutate(porchArea = `3SsnPorch` + EnclosedPorch + OpenPorchSF + ScreenPorch) %>%
+  mutate(`3SsnPorch_y` = if_else(`3SsnPorch` > 0,1,0)) %>%
+  mutate(EnclosedPorch_y = if_else(EnclosedPorch > 0,1,0)) %>%
+  mutate(OpenPorchSF_y = if_else(EnclosedPorch > 0,1,0)) %>%
+  mutate(ScreenPorch_y = if_else(ScreenPorch > 0,1,0))
+ 
+
+training_data$porchArea %na<-% 0
 
 training_data$Fence_f = factor(training_data$Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw"), ordered = FALSE)
 
 #WoodDeckSF Categorical Buckets from Quantitiative Data
 training_data$WoodDeckSF %na<-% 0
 training_data$WoodDeckSF_group<-cut(training_data$WoodDeckSF, c(0,100,200,300,400,900), ordered_result = FALSE, include.lowest = TRUE)
-table(training_data$WoodDeckSF_group)
-levels(training_data$WoodDeckSF_group)
 ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
-
 
 #OpenPorchSF Categorical Buckets from Quantitiative Data
 training_data$OpenPorchSF %na<-% 0
 training_data$OpenPorchSF_group<-cut(training_data$OpenPorchSF, c(0,50,100,150,200,550), ordered_result = FALSE, include.lowest = TRUE)
 ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
-hist(training_data$OpenPorchSF)
 
 #EnclosedPorch Categorical Buckets from Quantitiative Data
 training_data$EnclosedPorch_group<-cut(training_data$EnclosedPorch, c(0,50,100,150,200,600), ordered_result = FALSE, include.lowest = TRUE)
@@ -422,3 +425,4 @@ training_data$BsmtFinType1%na<-% "None"
 training_data$BsmtFinType2%na<-% "None"    
 training_data$BsmtQual%na<-% "None"
 training_data %<>% mutate(logGrLivArea = log(GrLivArea))
+training_data %<>% mutate(totalSF = training_data$`1stFlrSF` + training_data$`2ndFlrSF` + TotalBsmtSF)
