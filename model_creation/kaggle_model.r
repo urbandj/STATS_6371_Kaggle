@@ -19,6 +19,12 @@ names(training_data)
 training_model = training_data %>%
   dplyr::select(1:3,9,13:19,21,23:32,34:38,40:43,58,63,64,71,77:80,82:99,101:109,122,124:126,131)
 
+training_model$GarageCars3plus = factor(training_model$GarageCars3plus, levels = c("1","2","3","4"), ordered = TRUE)
+training_model$FireplaceY = factor(training_model$FireplaceY, levels = c(0,1), ordered = TRUE)
+
+training_data$TotalBsmtSF.b %na<-% 0
+training_data$TotalBsmtSF.b<-cut(training_data$TotalBsmtSF.b, c(0,2,4,6,8,14), ordered_result = TRUE, include.lowest = TRUE)
+max(training_data$TotalBsmtSF.b)
 
 training_modeldv = dummy_cols(training_model,remove_original = TRUE)
 # .n variables: 1:3,6,8:19,44:46,48:51,53,56,58,60,61,63:66,71:73,77:80,82:130
