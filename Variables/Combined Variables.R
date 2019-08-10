@@ -1,6 +1,4 @@
-
-
-#install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang','roperators'))
+install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang','roperators'))
 library(tidyverse) #general data wrangling tools
 library(skimr) #summary stats
 library(tangram) #has is.categorical() function, useful for creating tables
@@ -13,7 +11,8 @@ library(DAAG)
 #create training data object, please refer to this variable when making modificaitons to the dataset----
 #'if reading from local source
 #'library(readr)
-training_data <- read.csv("//DS1513/AllData/Adam/SMU Data Science Courses/DS 6371 Stats/Project/train.csv")
+training_data <- train
+  #read.csv("//DS1513/AllData/Adam/SMU Data Science Courses/DS 6371 Stats/Project/train.csv")
 #'View(train)
 
 #Jeff's Data----
@@ -25,10 +24,8 @@ training_data = training_data %>%
   mutate(GarageCars_f = as.factor(training_data$GarageCars)) %>%
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
   mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) #if a home has any features related to a porch then porch_yn = 1
-  
-training_data$Fence_f = factor(training_data$Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw"), ordered = TRUE)
 
-#WoodDeckSF Categorical Buckets from Quantitiative Data
+training_data$Fence_f = factor(training_data$Fence, levels=c("None", "GdPrv", "GdWo","MnPrv","MnWw"), ordered = TRUE)
 group_WoodDeckSF <- function(WoodDeckSF){
   if (WoodDeckSF >= 0 & WoodDeckSF <= 100){
     return('0-100SF')
@@ -105,8 +102,29 @@ group_MiscVal <- function(MiscVal){
 }
 training_data$MiscVal_group <- sapply(training_data$MiscVal,group_MiscVal)
 training_data$MiscVal_group <- factor(training_data$MiscVal_group, levels = c("$0-$200","$200-$400","$400-$600","$600-$800","> $800"), ordered = TRUE)
-levels(training_data$MiscVal_group)
 ggplot(data = training_data, aes(x=MiscVal_group, y=logSalePrice))+geom_point(stat ="identity")
+
+#Jeff updated----
+#WoodDeckSF Categorical Buckets from Quantitiative Data
+training_data$WoodDeckSF %na<-% 0
+training_data$WoodDeckSF_group<-cut(training_data$WoodDeckSF, c(0,100,200,300,400,900), ordered_result = TRUE, include.lowest = TRUE)
+table(training_data$WoodDeckSF_group)
+levels(training_data$WoodDeckSF_group)
+ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
+
+
+#OpenPorchSF Categorical Buckets from Quantitiative Data
+training_data$OpenPorchSF %na<-% 0
+training_data$OpenPorchSF_group<-cut(training_data$OpenPorchSF, c(0,50,100,150,200,550), ordered_result = TRUE, include.lowest = TRUE)
+ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
+hist(training_data$OpenPorchSF)
+
+#EnclosedPorch Categorical Buckets from Quantitiative Data
+training_data$EnclosedPorch_group<-cut(training_data$EnclosedPorch, c(0,50,100,150,200,600), ordered_result = TRUE, include.lowest = TRUE)
+ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity")
+
+#24 Observations of 3SsnPorch, not good predictor
+
 
 #'pool not good predictor, 7 cases with data
 #'MiscFeature not good predictor
@@ -142,6 +160,10 @@ training_data$FireplaceY <- ifelse(training_data$Fireplaces == 0, 0, 1)
 training_data$GarageType %na<-% "Detchd"
 
 training_data$GarageTypeY <- ifelse(training_data$GarageType == 'Attchd' | training_data$GarageType == 'BuiltIn', 1, 0)  
+
+table(training_data$BsmtExposure)
+#Garage Year Built
+training_data$GarageYrBlt %na<-% 0
 
 # GarageCars recode Significant 0, 1, 2, 3+ 
 GarCar <- c(0, 1, 2, 3, 4) 
@@ -190,7 +212,8 @@ training_data$MSSubClass_group <- factor(training_data$MSSubClass_group, levels 
 #MSZoningFactor%>% skim
 MSZoning.n<-as.numeric(training_data$MSZoning)
 
-
+table(training_data$Electrical)
+# training_data$LotFrontage %na<-% 0
 training_data$LotFrontage %na<-% 0
 group_LotFrontage <- function(LotFrontage){
   if (LotFrontage >= 0 & LotFrontage <= 50){
@@ -667,18 +690,20 @@ Electrical.n<-ifelse(training_data$Electrical=="Mix",1, ifelse(training_data$Ele
 Electrical.n  [is.na(Electrical.n)] <- 0
 training_data$Electrical.n <- Electrical.n
 
+#garage finish
 training_data$GarageYrBlt %na<-% 0 
 training_data$GarageFinish %na<-% "None"
 training_data$GarageQual %na<-% "None"
 training_data$FireplaceQu %na<-% "None"
 training_data$Electrical %na<-% "None"
 training_data$MasVnrType %na<-% "None"
+training_data$MasVnrArea %na<-% 0
 training_data$BsmtExposure%na<-% "None"
 training_data$BsmtCond%na<-% "None"
 training_data$BsmtFinType1%na<-% "None"     
 training_data$BsmtFinType2%na<-% "None"    
 training_data$BsmtQual%na<-% "None"
-
 training_data %<>% mutate(logGrLivArea = log(GrLivArea))
-write.csv(training_data, file = "//DS1513/AllData/Adam/SMU Data Science Courses/DS 6371 Stats/Project/training_data.csv")
 
+#Write Data to file
+#write.csv(training_data, file = "training_data.csv")
