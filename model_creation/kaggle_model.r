@@ -17,26 +17,14 @@ library(caret)
 #Create Dataset object----
 names(training_data)
 training_model = training_data %>%
-  dplyr::select(1:3,9,13:19,21,23:32,34:38,40:43,58,63,64,71,77:80,82:99,101:109,122,124:126,131)
+  dplyr::select(1:3,9,13:19,21,23:32,34:38,40:43,58,63,64,71,77:80,82:107,119)
 
-training_model$GarageCars3plus = factor(training_model$GarageCars3plus, levels = c("1","2","3","4"), ordered = TRUE)
-training_model$FireplaceY = factor(training_model$FireplaceY, levels = c(0,1), ordered = TRUE)
-
-training_data$TotalBsmtSF.b %na<-% 0
-training_data$TotalBsmtSF.b<-cut(training_data$TotalBsmtSF.b, c(0,2,4,6,8,14), ordered_result = TRUE, include.lowest = TRUE)
-max(training_data$TotalBsmtSF.b)
-
-training_modeldv = dummy_cols(training_model,remove_original = TRUE)
-# .n variables: 1:3,6,8:19,44:46,48:51,53,56,58,60,61,63:66,71:73,77:80,82:130
-names(training_data)
 training_model %>% skim
-
 #Linearity Check----
 
 hist(training_data$MasVnrArea)
 training_corr = training_model %>% 
   dplyr::select(BedroomAbvGr4plus,   
-      
             GarageArea,  
             Id,  
             logGrLivArea,  
@@ -48,11 +36,8 @@ training_corr = training_model %>%
             OverallQual,  
             ScreenPorch,     
             TotalBath,      
-              
             TotRmsAbvGrd10plus,     
-       
             YearRemodAdd,    
-          
             YrSold)#select all quantitiative variables here
 
 training_corr%>% skim
@@ -63,10 +48,11 @@ corrplot(corr_object, method = "number")#use this in write-up
 
 #Initial Model----
 options(max.print=999999)
-initial_model = lm(logSalePrice~.- logGrLivArea- GarageArea-OverallQual-TotalBath-GarageCars.Fac-FireplaceY-PavedDriveY-porch_yn  ,data = training_model)#once lines 22&23 are completed ~. inputs all variables into model,interaction terms can be added via "+ term1*term2"
+initial_model = lm(logSalePrice~.-logGrLivArea-GarageCond.N -PavedDriveY-porch_yn -BsmtFinType1-ExterQual.n ,data = training_model)#once lines 22&23 are completed ~. inputs all variables into model,interaction terms can be added via "+ term1*term2"
 summary(initial_model)
 vif(initial_model)
 
+table(training_data$GarageCars_f)
 #Outlier Check----
 plot(initial_model)
 ols_plot_cooksd_bar(initial_model)
@@ -76,27 +62,58 @@ ols_plot_cooksd_bar(initial_model)
 training_model_no <- training_model[-c(524,633,826,1325),] 
 
 #Model outliers addressed----
-new_model = lm(logSalePrice~., data = training_model_no)#interaction terms will need to be added here
+new_model = lm(logSalePrice~.-logGrLivArea-GarageCond.N -PavedDriveY-porch_yn -BsmtFinType1-ExterQual.n , data = training_model_no)#interaction terms will need to be added here
 summary(new_model)
 vif(new_model)
 
-step(new_model)
+stepAIC(new_model, direction = "both")
 
-newmodel = glm(logSalePrice ~ Id + MSSubClass + MSZoning + LotShape + 
-  Utilities + LotConfig + Neighborhood + Condition1 + BldgType + 
-  HouseStyle + OverallCond + RoofMatl + Exterior1st + MasVnrType + 
-  ExterCond + Foundation + BsmtQual + BsmtExposure + BsmtFinType1 + 
-  BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + Heating + 
-  HeatingQC + CentralAir + BsmtFullBath + FullBath + HalfBath + 
-  KitchenAbvGr + KitchenQual + Functional + FireplaceQu + GarageFinish + 
-  GarageArea + GarageQual + ScreenPorch + MoSold + SaleType + 
-  SaleCondition + GarageCars_f + pool_yn + WoodDeckSF_group + 
-  EnclosedPorch_group + TotRmsAbvGrd10plus + GarageTypeY + 
-  GarageCond.Fac + PavedDrive.Fac + MasVnrArea.b, data = training_model_no)
+stepmodel = lm(logSalePrice ~ MSSubClass + MSZoning + Neighborhood + 
+                 Condition1 + HouseStyle + OverallQual + OverallCond + YearRemodAdd + 
+                 RoofMatl + Exterior1st + MasVnrArea + Foundation + BsmtQual + 
+                 BsmtFinSF1 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                 CentralAir + FireplaceQu + GarageArea + GarageQual + ScreenPorch + 
+                 SaleType + SaleCondition + GarageCars_f + pool_yn + WoodDeckSF_group + 
+                 TotalBath + BedroomAbvGr4plus + KitchenQual.Fac + TotRmsAbvGrd10plus + 
+                 GarageTypeY + GarageCond.Fac + PavedDrive.Fac + MSSubClass_group + 
+                 LotFrontage_group + LotArea_group + YearBuilt.b, data = training_model_no)
 
-summary(newmodel)
-vif(newmodel)
+summary(stepmodel)#r^2=0.923
+vif(stepmodel)
 
+stepAIC(new_model, direction = "forward")
+forwards = lm(formula = logSalePrice ~ (Id + MSSubClass + MSZoning + LandContour + 
+                                           Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
+                                           OverallQual + OverallCond + YearRemodAdd + RoofMatl + Exterior1st + 
+                                           Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + 
+                                           Foundation + BsmtQual + BsmtCond + BsmtFinType1 + BsmtFinSF1 + 
+                                           BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                                           CentralAir + Electrical + FireplaceQu + GarageArea + GarageQual + 
+                                           ScreenPorch + MoSold + YrSold + SaleType + SaleCondition + 
+                                           GarageCars_f + pool_yn + porch_yn + Fence_f + WoodDeckSF_group + 
+                                           OpenPorchSF_group + EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + 
+                                           KitchenQual.Fac + KitchenQual.FacNum + TotRmsAbvGrd10plus + 
+                                           GarageTypeY + GarageCond.Fac + GarageCond.N + PavedDrive.Fac + 
+                                           PavedDriveY + MSSubClass_group + LotFrontage_group + LotArea_group + 
+                                           YearBuilt.b + YearRemodAdd.b + RoofStyleY + MasVnrArea.b + 
+                                           ExterQual.n + logGrLivArea) - logGrLivArea - GarageCond.N - 
+                 PavedDriveY - porch_yn - BsmtFinType1 - ExterQual.n, data = training_model_no)
+
+summary(forwards)#r^2=0.9228
+
+
+stepAIC(new_model, direction = "backward")
+backward = lm(logSalePrice ~ MSSubClass + MSZoning + Neighborhood + 
+                Condition1 + HouseStyle + OverallQual + OverallCond + YearRemodAdd + 
+                RoofMatl + Exterior1st + MasVnrArea + Foundation + BsmtQual + 
+                BsmtFinSF1 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                CentralAir + FireplaceQu + GarageArea + GarageQual + ScreenPorch + 
+                SaleType + SaleCondition + GarageCars_f + pool_yn + WoodDeckSF_group + 
+                TotalBath + BedroomAbvGr4plus + KitchenQual.Fac + TotRmsAbvGrd10plus + 
+                GarageTypeY + GarageCond.Fac + PavedDrive.Fac + MSSubClass_group + 
+                LotFrontage_group + LotArea_group + YearBuilt.b, data = training_model_no)
+
+summary(backward)#r^2=0.923
 #Assumption Check New Model----
 #residual
 
@@ -147,24 +164,57 @@ library(DAAG)
 
 library(forecast)
 
+forecast::cv(newmodel)
 cv.lm(df = training_model_no, form.lm = newmodel,m=3, seed=29)
 
-newmodel = lm(logSalePrice ~ Id + MSSubClass + MSZoning + LotShape + 
-                Utilities + LotConfig + Neighborhood + Condition1 + BldgType + 
-                HouseStyle + OverallCond + RoofMatl + Exterior1st + MasVnrType + 
-                ExterCond + Foundation + BsmtQual + BsmtExposure + BsmtFinType1 + 
-                BsmtFinSF1 + BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + Heating + 
-                HeatingQC + CentralAir + BsmtFullBath + FullBath + HalfBath + 
-                KitchenAbvGr + KitchenQual + Functional + FireplaceQu + GarageFinish + 
-                GarageArea + GarageQual + ScreenPorch + MoSold + SaleType + 
-                SaleCondition + GarageCars_f + pool_yn + WoodDeckSF_group + 
-                EnclosedPorch_group + TotRmsAbvGrd10plus + GarageTypeY + 
-                GarageCond.Fac + PavedDrive.Fac + MasVnrArea.b, data = training_model_no)
 
 summary(newmodel)
 vif(newmodel)
   
-  #-OR----
+set.seed(123) 
+train.control <- trainControl(method = "cv", number = 10)
+# Train the model
+model <- train(logSalePrice ~ Id + MSSubClass + MSZoning + LandContour + 
+                 Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
+                 OverallQual + OverallCond + YearRemodAdd + RoofMatl + Exterior1st + 
+                 Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + 
+                 Foundation + BsmtQual + BsmtCond + BsmtFinType1 + BsmtFinSF1 + 
+                 BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                 CentralAir + Electrical + FireplaceQu + GarageArea + GarageQual + 
+                 ScreenPorch + MoSold + YrSold + SaleType + SaleCondition + 
+                 Fence_f + WoodDeckSF_group + OpenPorchSF_group + EnclosedPorch_group + 
+                 GarageCars_f + pool_yn + porch_yn + TotalBath + BedroomAbvGr4plus + 
+                 KitchenQual.Fac + KitchenQual.FacNum + TotRmsAbvGrd10plus + 
+                 GarageTypeY + GarageCars3plus + GarageCond.Fac + GarageCond.N + 
+                 PavedDrive.Fac + PavedDriveY + MSSubClass_group + LotFrontage_group + 
+                 LotArea_group + YearBuilt.b + YearRemodAdd.b + RoofStyleY + 
+                 MasVnrArea.b + logGrLivArea - logGrLivArea - GarageCars3plus - 
+  GarageCond.N - PavedDriveY - porch_yn, data = training_model_no, method = "lm",
+               trControl = train.control)
+
+
+# Summarize the results
+print(model)
+
+cv.lm(training_model_no, form.lm = formula(logSalePrice ~ Id + MSSubClass + MSZoning + LandContour + 
+                                                  Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
+                                                  OverallQual + OverallCond + YearRemodAdd + RoofMatl + Exterior1st + 
+                                                  Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + 
+                                                  Foundation + BsmtQual + BsmtCond + BsmtFinType1 + BsmtFinSF1 + 
+                                                  BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                                                  CentralAir + Electrical + FireplaceQu + GarageArea + GarageQual + 
+                                                  ScreenPorch + MoSold + YrSold + SaleType + SaleCondition + 
+                                                  Fence_f + WoodDeckSF_group + OpenPorchSF_group + EnclosedPorch_group + 
+                                                  GarageCars_f + pool_yn + porch_yn + TotalBath + BedroomAbvGr4plus + 
+                                                  KitchenQual.Fac + KitchenQual.FacNum + TotRmsAbvGrd10plus + 
+                                                  GarageTypeY + GarageCars3plus + GarageCond.Fac + GarageCond.N + 
+                                                  PavedDrive.Fac + PavedDriveY + MSSubClass_group + LotFrontage_group + 
+                                                  LotArea_group + YearBuilt.b + YearRemodAdd.b + RoofStyleY + 
+                                                  MasVnrArea.b + logGrLivArea - logGrLivArea - GarageCars3plus - 
+                                                  GarageCond.N - PavedDriveY - porch_yn), m=3, dots = 
+        FALSE, seed=29, plotit=TRUE, printit=TRUE)
+
+#-OR----
 library(caret)
 
 # Define train control for k fold cross validation, will take a long time to run
