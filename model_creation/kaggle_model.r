@@ -84,7 +84,7 @@ vif(full.model)
 
 
 #Remove High VIF Variables----
-full_training_noVIF <- full_training[ -c(1,19,43,44,65:67,70,80,84,89,92:96)]
+full_training_noVIF <- full_training[ -c(1,18,42,43,64:66,69,79,82,86,88,91:95)]
 
 full.model2 <- lm(logSalePrice ~., data = full_training_noVIF)
 summary(full.model2)
