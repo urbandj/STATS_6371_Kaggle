@@ -11,6 +11,7 @@ library(DAAG)
 library(ggplot2)
 library(dplyr)
 install.packages("DAAG")
+library(plyr)
 
 
 #create training data object, please refer to this variable when making modificaitons to the dataset----
@@ -20,14 +21,6 @@ train<- read.csv("c:/Users/daj0079/Desktop/SMU/train.csv")
 train%>%skim
 
 training_data <- train
-
-#used to drop columns
-drop<- c("GarageCars_f")
-training_data = training_data[,!(names(training_data) %in% drop)]
-
-#used to add new columns
-training_data<-cbind(training_data, YearBuilt, YearRemodAdd)
-
 
 
 #Jeff's Data----
@@ -42,8 +35,8 @@ training_data = training_data %>%
   mutate(logSalePrice = log(SalePrice)) %>%
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
   mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>%
-  mutate(porchArea = `3SsnPorch` + EnclosedPorch + OpenPorchSF + ScreenPorch) %>%
-  mutate(`3SsnPorch_y` = if_else(`3SsnPorch` > 0,1,0)) %>%
+  mutate(porchArea = training_data$X3SsnPorch + EnclosedPorch + OpenPorchSF + ScreenPorch) %>%
+  mutate(X3SsnPorch_y = if_else(X3SsnPorch > 0,1,0)) %>%
   mutate(EnclosedPorch_y = if_else(EnclosedPorch > 0,1,0)) %>%
   mutate(OpenPorchSF_y = if_else(EnclosedPorch > 0,1,0)) %>%
   mutate(ScreenPorch_y = if_else(ScreenPorch > 0,1,0))#if a home has any features related to a porch then porch_yn = 1
@@ -413,7 +406,7 @@ sum(is.na(training_data$BsmtQual))
 #0=NA	No Basement
 BsmtCond<-ifelse(training_data$BsmtCond=="Po",1, ifelse(training_data$BsmtCond=="Fa", 2,ifelse(training_data$BsmtCond=="TA", 3, 
                                                                                                ifelse(training_data$BsmtCond=="Gd",4,ifelse(training_data$BsmtCond=="Ex",5,ifelse(training_data$BsmtCond=="NA",0,0))))))
-fct_explicit_na(training_data$BsmtCond, na_level = "None")->training_data$BsmtCond
+fct_explicit_na(training_data$BsmtCond, na_level = "TA")->training_data$BsmtCond
 ggplot(data = training_data, aes(x=training_data$BsmtCond, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$BsmtCond))
 
@@ -589,7 +582,7 @@ Electrical<-ifelse(training_data$Electrical=="Mix",1, ifelse(training_data$Elect
 
 
 fct_explicit_na(training_data$Electrical, na_level = "NONE")->training_data$Electrical
-
+fct_explicit_na(training_data$Exterior2nd, na_level = "NONE")->training_data$Exterior2nd
 sum(is.na(training_data$Electrical))
 
 
@@ -602,7 +595,6 @@ training_data%>%skim
 fct_explicit_na(training_data$FireplaceQu, na_level = "NONE")->training_data$FireplaceQu
 fct_explicit_na(training_data$GarageFinish, na_level = "NONE")->training_data$GarageFinish
 fct_explicit_na(training_data$GarageQual, na_level = "NONE")->training_data$GarageQual
-
 
 
 training_data %<>% mutate(logGrLivArea = log(GrLivArea))
