@@ -53,28 +53,28 @@ sum(is.na(training_data$Fence))
 #WoodDeckSF Categorical Buckets from Quantitiative Data
 training_data$WoodDeckSF %na<-% 0
 training_data$WoodDeckSF_group<-cut(training_data$WoodDeckSF, c(0,100,200,300,400,900), ordered_result = FALSE, include.lowest = TRUE)
-ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=WoodDeckSF_group, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$WoodDeckSF_group]), 
-                                           max(training_data$logSalePrice[training_data$WoodDeckSF_group]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$WoodDeckSF_group]), 
+                                           max(training_data$SalePrice[training_data$WoodDeckSF_group]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 #OpenPorchSF Categorical Buckets from Quantitiative Data
 training_data$OpenPorchSF %na<-% 0
 training_data$OpenPorchSF_group<-cut(training_data$OpenPorchSF, c(0,50,100,150,200,550), ordered_result = FALSE, include.lowest = TRUE)
-ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=OpenPorchSF_group, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$OpenPorchSF]), 
-                                           max(training_data$logSalePrice[training_data$OpenPorchSF]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$OpenPorchSF]), 
+                                           max(training_data$SalePrice[training_data$OpenPorchSF]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 #EnclosedPorch Categorical Buckets from Quantitiative Data
 #training_data$EnclosedPorch_group %na<-% 0
 training_data$EnclosedPorch_group<-cut(training_data$EnclosedPorch, c(0,50,100,150,200,600), ordered_result = FALSE, include.lowest = TRUE)
-ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=EnclosedPorch_group, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$EnclosedPorch_group]), 
-                                           max(training_data$logSalePrice[training_data$EnclosedPorch_group]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$EnclosedPorch_group]), 
+                                           max(training_data$SalePrice[training_data$EnclosedPorch_group]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 #24 Observations of 3SsnPorch, not good predictor
@@ -96,19 +96,19 @@ ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_po
 
 # USE THIS ONE !! Bath FullBath + (0.5 * HalfBath) RECODE to THREE PLUS
 training_data$TotalBath <- training_data$FullBath + (0.5 * training_data$HalfBath)
-ggplot(data = training_data, aes(x=TotalBath, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=TotalBath, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$TotalBath]), 
-                                           max(training_data$logSalePrice[training_data$TotalBath]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$TotalBath]), 
+                                           max(training_data$SalePrice[training_data$TotalBath]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 sum(is.na(training_data$TotalBath))
 
 # BedroomAbvGr 4+ bedrooms
 training_data$BedroomAbvGr4plus <- ifelse(training_data$BedroomAbvGr >= 4, 4, training_data$BedroomAbvGr)  
-ggplot(data = training_data, aes(x=BedroomAbvGr4plus, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=BedroomAbvGr4plus, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$BedroomAbvGr4plus]), 
-                                           max(training_data$logSalePrice[training_data$BedroomAbvGr4plus]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$BedroomAbvGr4plus]), 
+                                           max(training_data$SalePrice[training_data$BedroomAbvGr4plus]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 sum(is.na(training_data$BedroomAbvGr4plus))
 
@@ -120,19 +120,19 @@ training_data = training_data[,!(names(training_data) %in% drop)]
 Qual4 <- c("Fa", "TA", "Gd", "Ex") # no "Po" data
 training_data$KitchenQual <- factor(x=training_data$KitchenQual, levels=Qual4, ordered = FALSE)
 
-ggplot(data = training_data, aes(x=KitchenQual, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=KitchenQual, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$KitchenQual]), 
-                                           max(training_data$logSalePrice[training_data$KitchenQual]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$KitchenQual]), 
+                                           max(training_data$SalePrice[training_data$KitchenQual]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 sum(is.na(training_data$KitchenQual))
 
 #POSSIBLE TotRmsAbvGrd MAY NEED TO RECODE FOR 10+
 training_data$TotRmsAbvGrd10plus <- ifelse(training_data$TotRmsAbvGrd >= 10, 10, training_data$TotRmsAbvGrd) 
-ggplot(data = training_data, aes(x=TotRmsAbvGrd10plus, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=TotRmsAbvGrd10plus, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$TotRmsAbvGrd10plus]), 
-                                           max(training_data$logSalePrice[training_data$TotRmsAbvGrd10plus]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$TotRmsAbvGrd10plus]), 
+                                           max(training_data$SalePrice[training_data$TotRmsAbvGrd10plus]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 drop<- c("TotRmsAbvGr")
@@ -140,10 +140,10 @@ training_data = training_data[,!(names(training_data) %in% drop)]
 
 # Fireplaces
 training_data$FireplaceY <- ifelse(training_data$Fireplaces == 0, 0, 1)  
-ggplot(data = training_data, aes(x=FireplaceY, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=FireplaceY, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$FireplaceY]) +
-                                           max(training_data$logSalePrice[training_data$FireplaceY]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$FireplaceY]) +
+                                           max(training_data$SalePrice[training_data$FireplaceY]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 drop<- c("Fireplace")
@@ -152,35 +152,35 @@ training_data = training_data[,!(names(training_data) %in% drop)]
 
 # GarageType different values "2Types Attchd Basment BuiltIn CarPort Detchd"
 training_data$GarageType %na<-% "Detchd"
-ggplot(data = training_data, aes(x=GarageType, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=GarageType, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$GarageType]), 
-                                           max(training_data$logSalePrice[training_data$GarageType]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$GarageType]), 
+                                           max(training_data$SalePrice[training_data$GarageType]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 training_data$GarageTypeY <- ifelse(training_data$GarageType == 'Attchd' | training_data$GarageType == 'BuiltIn', 1, 0)  
-ggplot(data = training_data, aes(x=GarageTypeY, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=GarageTypeY, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$GarageTypeY]) +
-                                           max(training_data$logSalePrice[training_data$GarageTypeY]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$GarageTypeY]) +
+                                           max(training_data$SalePrice[training_data$GarageTypeY]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 ##### strange may want check buckets
 #Garage Year Built
 training_data$GarageYrBlt %na<-% 0
-ggplot(data = training_data, aes(x=GarageYrBlt, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=GarageYrBlt, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$GarageYrBlt]) +
-                                           max(training_data$logSalePrice[training_data$GarageYrBlt]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$GarageYrBlt]) +
+                                           max(training_data$SalePrice[training_data$GarageYrBlt]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 # GarageCars recode Significant 0, 1, 2, 3+ 
 GarCar <- c(0, 1, 2, 3, 4) 
 training_data$GarageCars<- factor(x=training_data$GarageCars, levels=GarCar, ordered = FALSE)
 #training_data$GarageCars3plus <- ifelse(training_data$GarageCars == 4, 3, training_data$GarageCars) 
-#ggplot(data = training_data, aes(x=GarageCars3plus, y=logSalePrice))+geom_point(stat ="identity")
-ggplot(data = training_data, aes(x=GarageCars, y=logSalePrice))+geom_point(stat ="identity") +
+#ggplot(data = training_data, aes(x=GarageCars3plus, y=SalePrice))+geom_point(stat ="identity")
+ggplot(data = training_data, aes(x=GarageCars, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$GarageCars]) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$GarageCars]) +
                                            max(training_data$SalePrice[training_data$GarageCars]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
@@ -194,26 +194,29 @@ Qual5 <- c("Po", "Fa", "TA", "Gd", "Ex")
 training_data$GarageCond <- factor(x=training_data$GarageCond, levels=Qual5, ordered = FALSE)
 training_data$GarageCond <- as.numeric(training_data$GarageCond)
 training_data$GarageCond %na<-% 0
-ggplot(data = training_data, aes(x=GarageCond, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=GarageCond, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$GarageCond]) + 
-                                           max(training_data$logSalePrice[training_data$GarageCond]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$GarageCond]) + 
+                                           max(training_data$SalePrice[training_data$GarageCond]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 
 # PavedDrive
 Pave <- c("N", "P", "Y") 
 training_data$PavedDrive <- factor(x=training_data$PavedDrive, levels=Pave, ordered = FALSE)
-ggplot(data = training_data, aes(x=PavedDrive, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=PavedDrive, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$PavedDrive]) + 
-                                           max(training_data$logSalePrice[training_data$PavedDrive]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$PavedDrive]) + 
+                                           max(training_data$SalePrice[training_data$PavedDrive]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 # PavedDriveY POSSIBLE
 #training_data$PavedDriveY <- ifelse(training_data$PavedDrive == "Y", 1, 0)  
 
-#ggplot(data = training_data, aes(x=PavedDriveY, y=logSalePrice))+geom_point(stat ="identity")
+#ggplot(data = training_data, aes(x=PavedDriveY, y=SalePrice))+geom_point(stat ="identity") +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$PavedDriveY]) + 
+                                           max(training_data$SalePrice[training_data$PavedDriveY]))) +
+  scale_y_continuous(labels=dollar_format(prefix="$"))
 
 
 #Reannan's Data----
@@ -234,10 +237,10 @@ group_MSSubClass <- function(MSSubClass){
 }
 training_data$MSSubClass <- sapply(training_data$MSSubClass,group_MSSubClass)
 training_data$MSSubClass<- factor(training_data$MSSubClass, levels = c('0-30','30-60','60-90','90-110','>110'), ordered = FALSE)
-ggplot(data = training_data, aes(x=MSSubClass, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=MSSubClass, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$MSSubClass]) + 
-                                           max(training_data$logSalePrice[training_data$MSSubClass]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$MSSubClass]) + 
+                                           max(training_data$SalePrice[training_data$MSSubClass]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 
 
@@ -249,10 +252,10 @@ ggplot(data = training_data, aes(x=MSSubClass, y=logSalePrice))+geom_point(stat 
 #5=RM
 #MSZoningFactor%>% skim
 
-ggplot(data = training_data, aes(x=MSZoning, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=MSZoning, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$MSZoning]) + 
-                                           max(training_data$logSalePrice[training_data$MSZoning]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$MSZoning]) + 
+                                           max(training_data$SalePrice[training_data$MSZoning]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 sum(is.na(training_data$MSZoning))
 
@@ -276,10 +279,10 @@ group_LotFrontage <- function(LotFrontage){
 training_data$LotFrontage <- sapply(training_data$LotFrontage,group_LotFrontage)
 training_data$LotFrontage <- factor(training_data$LotFrontage, levels = c('0-50','50-80','80-110','110-140','>140'), ordered = FALSE)
 #levels(training_data$LotFrontage_group)
-ggplot(data = training_data, aes(x=LotFrontage, y=logSalePrice))+geom_point(stat ="identity") +
+ggplot(data = training_data, aes(x=LotFrontage, y=SalePrice))+geom_point(stat ="identity") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$logSalePrice[training_data$LotFrontage]) +
-                                           max(training_data$logSalePrice[training_data$LotFrontage]))) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$LotFrontage]) +
+                                           max(training_data$SalePrice[training_data$LotFrontage]))) +
   scale_y_continuous(labels=dollar_format(prefix="$"))
 sum(is.na(training_data$LotFrontage))
 
