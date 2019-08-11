@@ -20,6 +20,7 @@ library(readr)
 train<- read.csv("c:/Users/daj0079/Desktop/SMU/train.csv")
 train%>%skim
 
+names(training_data)[69] = "X3SsnPorch"
 training_data <- train
 
 
@@ -608,3 +609,9 @@ full_training <-training_data
 
 full_training%>%skim
 table(full_training$EnclosedPorch_group)
+
+set.seed(1)
+TrainObs=sample(seq(1,dim(full_training)[1]), round(.75*dim(full_training)[1]), replace=FALSE)
+
+ames_train=full_training[TrainObs,]
+ames_test=full_training[-TrainObs,]
