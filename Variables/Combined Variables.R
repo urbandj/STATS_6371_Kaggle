@@ -267,8 +267,8 @@ ggplot(data = training_data, aes(x=training_data$LandSlope, y=SalePrice))+geom_p
 #24=Timber
 #25=Veenker
 ordered(training_data$Neighborhood)
-ggplot(data = training_data, aes(x=training_data$Neighborhood, y=SalePrice))+geom_point(stat ="identity")
-
+ggplot(data = training_data, aes(x=training_data$Neighborhood, y=SalePrice))+geom_point(stat ="identity") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
 
 
 
