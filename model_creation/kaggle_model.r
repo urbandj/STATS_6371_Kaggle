@@ -15,7 +15,7 @@ library(MASS)#studentized residuals
 library(caret)
 
 
-full_training %>% skim
+full_training =ames_train
 
 #Linearity Check----
 
