@@ -1,27 +1,28 @@
 install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang','roperators'))
-library(tidyverse) #general data wrangling tools
-library(skimr) #summary stats
-library(tangram) #has is.categorical() function, useful for creating tables
-library(car) # Regression tools
-library(fastDummies) # creates dummy variables
-library(rlang)
-library(olsrr)
-library(roperators) #used to convert NAs to to different values
-library(DAAG)
-library(ggplot2)
-library(dplyr)
-install.packages("DAAG")
-library(plyr)
+require(tidyverse) #general data wrangling tools
+require(skimr) #summary stats
+require(tangram) #has is.categorical() function, useful for creating tables
+require(car) # Regression tools
+require(fastDummies) # creates dummy variables
+require(rlang)
+require(olsrr)
+require(roperators) #used to convert NAs to to different values
+require(DAAG)
+require(ggplot2)
+require(dplyr)
+require(plyr)
+library(mefa4)
 
 
 #create training data object, please refer to this variable when making modificaitons to the dataset----
 #'if reading from local source
-library(readr)
+require(readr)
 train<- read.csv("c:/Users/daj0079/Desktop/SMU/train.csv")
 train%>%skim
 
-names(training_data)[69] = "X3SsnPorch"
 training_data <- train
+
+
 
 
 #Jeff's Data----
@@ -30,13 +31,13 @@ training_data <-training_data[-c(7)]
 drop<- c("PoolQC","MiscFeature")
 training_data = training_data[,!(names(training_data) %in% drop)]
 
-
+names(training_data)[69] = "X3SsnPorch"
 
 training_data = training_data %>% 
   mutate(logSalePrice = log(SalePrice)) %>%
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
-  mutate(porch_yn = if_else(("3SsnPorch" == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>%
-  mutate(porchArea = training_data$X3SsnPorch + EnclosedPorch + OpenPorchSF + ScreenPorch) %>%
+  mutate(porch_yn = if_else((X3SsnPorch == 0 || EnclosedPorch == 0 || OpenPorchSF == 0 || ScreenPorch == 0),0,1)) %>%
+  mutate(porchArea = X3SsnPorch + EnclosedPorch + OpenPorchSF + ScreenPorch) %>%
   mutate(X3SsnPorch_y = if_else(X3SsnPorch > 0,1,0)) %>%
   mutate(EnclosedPorch_y = if_else(EnclosedPorch > 0,1,0)) %>%
   mutate(OpenPorchSF_y = if_else(EnclosedPorch > 0,1,0)) %>%
@@ -331,7 +332,7 @@ training_data$YearRemodAdd[is.na(training_data$YearRemodAdd)] <- "NONE"
 training_data$YearRemodAdd
 
 ggplot(data = training_data, aes(x=YearRemodAdd, y=logSalePrice))+geom_point(stat ="identity") +
-theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
+  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
 
 
 #David's Data----
@@ -587,7 +588,7 @@ fct_explicit_na(training_data$Electrical, na_level = "NONE")->training_data$Elec
 fct_explicit_na(training_data$Exterior2nd, na_level = "NONE")->training_data$Exterior2nd
 sum(is.na(training_data$Electrical))
 
-
+require(scales)
 ggplot(data = training_data, aes(x=training_data$Electrical, y=SalePrice, color= Electrical))+geom_point(stat ="identity") +
   theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5)) +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
@@ -619,8 +620,7 @@ table(full_training$EnclosedPorch_group)
 #TrainObs=sample(seq(1,dim(full_training)[1]), round(.75*dim(full_training)[1]), replace=FALSE)
 
 #ames_train=full_training[TrainObs,]
-#ames_test=full_training[-TrainObs,]
-
+data
 testList = c(9,14,15,16,17,27,29,30,32,36,44,50,51,52,53,60,61,70,72,74,76,80,85,88,92,93,94,98,101,
              102,104,107,113,114,125,134,135,137,146,160,164,165,167,169,171,173,175,177,183,186,187,188,203,207,208,209,220,222,
              225,235,238,239,240,244,247,253,254,267,270,271,274,275,278,280,281,282,283,286,290,295,297,309,310,312,319,323,331,
@@ -636,4 +636,6 @@ testList = c(9,14,15,16,17,27,29,30,32,36,44,50,51,52,53,60,61,70,72,74,76,80,85
              1378,1381,1382,1384,1387,1403,1406,1412,1416,1424,1428,1435,1440,1441,1449,1452,1459) 
 ames_test = full_training %>% filter(Id %in% testList)
 
-ames_training = full_training %>% filter(Id %notin% testList)
+ames_train = full_training %>% filter(Id %notin% testList)
+
+skim(ames_train)
