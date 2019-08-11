@@ -330,7 +330,8 @@ training_data%>%skim
 training_data$YearRemodAdd[is.na(training_data$YearRemodAdd)] <- "NONE"
 training_data$YearRemodAdd
 
-ggplot(data = training_data, aes(x=YearRemodAdd, y=logSalePrice))+geom_point(stat ="identity")
+ggplot(data = training_data, aes(x=YearRemodAdd, y=logSalePrice))+geom_point(stat ="identity") +
+theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
 
 
 #David's Data----
