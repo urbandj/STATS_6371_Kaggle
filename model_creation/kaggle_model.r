@@ -93,6 +93,7 @@ vif(full.model2)
 
 #Outlier Check----
 plot(full.model)
+
 ols_plot_cooksd_bar(full.model2)
 
 #Outlier Removal----
@@ -232,7 +233,24 @@ assumptionPlots(custom,full_training_no)
 
 
 #Cross Validation----
-#install.packages('forecast')
+#Generate prediction
+cv <- function(model, data){
+stepmodelpredict = predict(model,interval = "predict",newdata = data)
+as.data.frame(stepmodelpredict)
+
+#Find MSPE and check
+MSPE = data.frame(Observed = data$logSalePrice, Predicted = stepmodelpredict)
+MSPE$Residual = MSPE$Observed -MSPE$Predicted.fit
+MSPE$SqauaredResidual = MSPE$Residual^2
+print("MSPE is: ")
+mean(MSPE$SqauaredResidual)
+
+
+}
+cv(stepmodel,full_training_no)
+cv(forwards,full_training_no)
+cv(b.step.model,full_training_no)
+cv(custom,full_training_no)
 
 
 
