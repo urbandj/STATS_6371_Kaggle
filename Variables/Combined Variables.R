@@ -588,8 +588,8 @@ fct_explicit_na(training_data$Exterior2nd, na_level = "NONE")->training_data$Ext
 sum(is.na(training_data$Electrical))
 
 
-ggplot(data = training_data, aes(x=training_data$Electrical, y=SalePrice, color= Electrical))+geom_point(stat ="identity")+coord_flip()
-
+ggplot(data = training_data, aes(x=training_data$Electrical, y=SalePrice, color= Electrical))+geom_point(stat ="identity") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
 
 training_data%>%skim
 #garage finish
