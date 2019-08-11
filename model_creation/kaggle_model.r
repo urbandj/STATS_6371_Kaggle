@@ -95,7 +95,7 @@ plot(full.model)
 ols_plot_cooksd_bar(initial_model)
 
 #Outlier Removal----
-full_training_no <- full_training_noVIF[-c(198,463,633,524,692,826,969),] 
+full_training_no <- full_training_noVIF[-c(74,266,416,547,548,651,892),] 
 
 full_training_no$BsmtFinType1 <- relevel(full_training_no$BsmtFinType1, ref = "None")
 
