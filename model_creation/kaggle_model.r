@@ -85,10 +85,10 @@ vif(full.model)
 
 
 #Remove High VIF Variables----
-full_training_noVIF <- full_training[ -c(1,18,42,43,45,64:66,69,76,79,82,86,88,91:95)]
+full_training_noVIF <- full_training[ -c(1,18,42,43,45,64:66,69,76,79,82,86,88,91:95, 23,27,32,59,61)]
 
 full.model2 <- lm(logSalePrice ~., data = full_training_noVIF)
-summary(full.model2) #R^2 = 0.9257
+summary(full.model2) #R^2 = 0.9252
 vif(full.model2)
 
 #Outlier Check----
@@ -96,13 +96,13 @@ plot(full.model)
 ols_plot_cooksd_bar(full.model2)
 
 #Outlier Removal----
-full_training_no <- full_training_noVIF[-c(74,266,416,547,548,651,892,922,427,314,1029,127,547),] 
+full_training_no <- full_training_noVIF[-c(74,266,416,547,548,651,892,922,314,427,1029,547),] 
 #cooks plot outliers - 427,314,1029,127,547
 full_training_no$BsmtFinType1 <- relevel(full_training_no$BsmtFinType1, ref = "None")
 
 #Model outliers addressed----
 new_model = lm(logSalePrice~., data = full_training_no)#interaction terms will need to be added here
-summary(new_model) #R^2 = 0.9388
+summary(new_model) #R^2 = 0.9361
 vif(new_model)
 
 
@@ -111,19 +111,20 @@ vif(new_model)
 #Step
 stepAIC(new_model, direction = "both")
 
-stepmodel = lm(logSalePrice ~ MSZoning + LotFrontage + LotArea + 
-                 Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + 
-                 Condition2 + BldgType + OverallQual + OverallCond + RoofMatl + 
-                 Exterior1st + Exterior2nd + MasVnrArea + ExterCond + Foundation + 
-                 BsmtQual + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + 
-                 BsmtFinSF2 + TotalBsmtSF + Heating + HeatingQC + CentralAir + 
-                 BsmtFullBath + FullBath + HalfBath + KitchenQual + TotRmsAbvGrd + 
-                 Functional + Fireplaces + GarageType + GarageCars + GarageArea + 
-                 GarageCond + PavedDrive + ScreenPorch + MiscVal + SaleType + 
-                 SaleCondition + WoodDeckSF_group + pool_yn + porchArea + 
-                 MultipleFloor, data = full_training_no)
+stepmodel = lm(logSalePrice ~ MSSubClass + MSZoning + LotFrontage + 
+                 LotArea + Utilities + LotConfig + LandSlope + Neighborhood + 
+                 Condition1 + OverallQual + OverallCond + RoofMatl + Exterior1st + 
+                 Foundation + BsmtQual + BsmtExposure + BsmtFinSF1 + TotalBsmtSF + 
+                 Heating + HeatingQC + CentralAir + BsmtFullBath + FullBath + 
+                 HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + 
+                 Fireplaces + GarageType + GarageArea + PavedDrive + X3SsnPorch + 
+                 ScreenPorch + MiscVal + SaleCondition + WoodDeckSF_group + 
+                 pool_yn + MultipleFloor, data = full_training_no)
 
-summary(stepmodel)#r^2=0.9405
+summary(stepmodel)#r^2=0.9365
+
+
+
 
 #Forwards
 stepAIC(new_model, direction = "forward")
@@ -131,41 +132,37 @@ forwards = lm(logSalePrice ~ MSSubClass + MSZoning + LotFrontage +
                 LotArea + Street + LandContour + Utilities + LotConfig + 
                 LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + 
                 HouseStyle + OverallQual + OverallCond + YearRemodAdd + RoofStyle + 
-                RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + 
-                ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + 
-                BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + 
-                BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + 
-                CentralAir + Electrical + LowQualFinSF + BsmtFullBath + BsmtHalfBath + 
-                FullBath + HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + 
-                Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + 
-                GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + 
-                PavedDrive + X3SsnPorch + ScreenPorch + Fence + MiscVal + 
-                MoSold + YrSold + SaleType + SaleCondition + WoodDeckSF_group + 
-                OpenPorchSF_group + pool_yn + porchArea + X3SsnPorch_y + 
-                EnclosedPorch_y + ScreenPorch_y + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
-                MultipleFloor, data = full_training_no)
-summary(forwards)#r^2=0.9388
+                RoofMatl + Exterior1st + MasVnrType + MasVnrArea + ExterQual + 
+                Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinSF1 + 
+                BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + 
+                HeatingQC + CentralAir + Electrical + LowQualFinSF + BsmtFullBath + 
+                BsmtHalfBath + FullBath + HalfBath + KitchenAbvGr + KitchenQual + 
+                TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + 
+                GarageYrBlt + GarageFinish + GarageArea + GarageCond + PavedDrive + 
+                X3SsnPorch + ScreenPorch + Fence + MiscVal + MoSold + YrSold + 
+                SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+                pool_yn + porchArea + X3SsnPorch_y + EnclosedPorch_y + ScreenPorch_y + 
+                BedroomAbvGr4plus + TotRmsAbvGrd10plus + MultipleFloor, data = full_training_no)
+summary(forwards)#r^2=0.9361
 
 #Backwards
 b.step.model <- stepAIC(new_model, direction = "backward", 
                         trace = FALSE)
-summary(b.step.model)#r^2=0.9405
+summary(b.step.model)#r^2=0.9365
 
 
 #Custom
-custom = lm(logSalePrice ~ MSZoning + LotFrontage + LotArea + 
-              Utilities + LotConfig + LandSlope + Neighborhood + Condition1 + 
-              Condition2 + BldgType + OverallQual + OverallCond + RoofMatl + 
-              Exterior1st + Exterior2nd + MasVnrArea + ExterCond + Foundation + 
-              BsmtQual + BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + 
-              BsmtFinSF2 + TotalBsmtSF + Heating + HeatingQC + CentralAir + 
-              BsmtFullBath + FullBath + HalfBath + KitchenQual + TotRmsAbvGrd + 
-              Functional + Fireplaces + GarageType + GarageCars + GarageArea + 
-              GarageCond + PavedDrive + ScreenPorch + MiscVal + SaleType + 
-              SaleCondition + WoodDeckSF_group + pool_yn + porchArea + 
-              MultipleFloor + porchArea*Fence , data = full_training_no)
+custom = lm(logSalePrice ~ MSSubClass + MSZoning + LotFrontage + 
+              LotArea + Utilities + LotConfig + LandSlope + Neighborhood + 
+              Condition1 + OverallQual + OverallCond + RoofMatl + Exterior1st + 
+              Foundation + BsmtQual + BsmtExposure + BsmtFinSF1 + TotalBsmtSF + 
+              Heating + HeatingQC + CentralAir + BsmtFullBath + FullBath + 
+              HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + 
+              Fireplaces + GarageType + GarageArea + PavedDrive + X3SsnPorch + 
+              ScreenPorch + MiscVal + SaleCondition + WoodDeckSF_group + 
+              pool_yn + MultipleFloor + Heating*CentralAir , data = full_training_no)
 
-summary(custom)#r^2=0.9407
+summary(custom)#r^2=0.9724
 vif(stepmodel)
 
 #Assumption Check New Model----
