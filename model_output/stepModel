@@ -1,0 +1,350 @@
+Step Model Formula and Output---------------------------------
+
+step = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
+               Utilities + LotConfig + Neighborhood + Condition1 + Condition2 + 
+               BldgType + OverallQual + OverallCond + YearBuilt + RoofMatl + 
+               Exterior1st + MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + 
+               BsmtFinSF1 + BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + 
+               `2ndFlrSF` + BsmtFullBath + FullBath + HalfBath + KitchenAbvGr + 
+               KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
+               GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
+               SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+               BedroomAbvGr4plus + TotRmsAbvGrd10plus,  data = full_training_no)
+
+
+Formula Output------------------------------------------------
+
+Call:
+lm(formula = SalePrice ~ MSSubClass + LotFrontage + Street + 
+    Utilities + LotConfig + Neighborhood + Condition1 + Condition2 + 
+    BldgType + OverallQual + OverallCond + YearBuilt + RoofMatl + 
+    Exterior1st + MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + 
+    BsmtFinSF1 + BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + 
+    `2ndFlrSF` + BsmtFullBath + FullBath + HalfBath + KitchenAbvGr + 
+    KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
+    GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
+    SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+    BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = full_training_no)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-133925   -9584     133    9809  130051 
+
+Coefficients:
+                             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                -1.176e+06  1.510e+05  -7.789 1.78e-14 ***
+MSSubClass30-60             2.373e+03  2.874e+03   0.826 0.409062    
+MSSubClass60-90            -3.603e+03  3.039e+03  -1.186 0.236067    
+MSSubClass>110             -3.399e+04  1.294e+04  -2.626 0.008779 ** 
+LotFrontage50-80            1.655e+03  1.866e+03   0.887 0.375492    
+LotFrontage80-110           2.283e+03  2.445e+03   0.934 0.350714    
+LotFrontage110-140         -3.837e+03  4.706e+03  -0.815 0.415161    
+LotFrontage>140             2.950e+04  8.173e+03   3.609 0.000324 ***
+StreetPave                  2.632e+04  1.222e+04   2.153 0.031574 *  
+UtilitiesNoSeWa            -4.253e+04  2.375e+04  -1.791 0.073681 .  
+LotConfigCulDSac            8.936e+03  3.453e+03   2.588 0.009806 ** 
+LotConfigFR2               -3.075e+03  4.161e+03  -0.739 0.460103    
+LotConfigFR3               -1.502e+04  1.370e+04  -1.097 0.273125    
+LotConfigInside             6.205e+02  1.882e+03   0.330 0.741673    
+NeighborhoodBlueste        -6.150e+03  2.442e+04  -0.252 0.801194    
+NeighborhoodBrDale         -3.118e+02  1.013e+04  -0.031 0.975463    
+NeighborhoodBrkSide        -8.247e+03  8.877e+03  -0.929 0.353075    
+NeighborhoodClearCr         1.566e+04  9.561e+03   1.638 0.101847    
+NeighborhoodCollgCr        -3.074e+03  7.350e+03  -0.418 0.675893    
+NeighborhoodCrawfor         1.276e+04  8.689e+03   1.468 0.142464    
+NeighborhoodEdwards        -1.612e+04  8.210e+03  -1.964 0.049847 *  
+NeighborhoodGilbert        -5.638e+03  7.863e+03  -0.717 0.473504    
+NeighborhoodIDOTRR         -1.760e+04  9.261e+03  -1.901 0.057631 .  
+NeighborhoodMeadowV        -1.165e+04  1.017e+04  -1.145 0.252464    
+NeighborhoodMitchel        -1.516e+04  8.215e+03  -1.846 0.065262 .  
+NeighborhoodNAmes          -1.443e+04  7.899e+03  -1.827 0.068061 .  
+NeighborhoodNoRidge         3.309e+04  8.728e+03   3.791 0.000159 ***
+NeighborhoodNPkVill         3.550e+03  1.123e+04   0.316 0.752069    
+NeighborhoodNridgHt         2.769e+04  7.595e+03   3.645 0.000282 ***
+NeighborhoodNWAmes         -1.442e+04  8.191e+03  -1.760 0.078657 .  
+NeighborhoodOldTown        -1.825e+04  8.659e+03  -2.107 0.035364 *  
+NeighborhoodSawyer         -4.036e+03  8.355e+03  -0.483 0.629145    
+NeighborhoodSawyerW        -3.493e+03  7.942e+03  -0.440 0.660212    
+NeighborhoodSomerst         5.218e+03  7.683e+03   0.679 0.497210    
+NeighborhoodStoneBr         4.592e+04  8.657e+03   5.304 1.41e-07 ***
+NeighborhoodSWISU          -1.849e+04  9.568e+03  -1.933 0.053557 .  
+NeighborhoodTimber         -2.531e+03  8.254e+03  -0.307 0.759167    
+NeighborhoodVeenker         8.101e+03  1.055e+04   0.768 0.442759    
+Condition1Feedr             4.480e+02  5.364e+03   0.084 0.933445    
+Condition1Norm              1.061e+04  4.330e+03   2.451 0.014435 *  
+Condition1PosA             -1.037e+03  9.825e+03  -0.106 0.915948    
+Condition1PosN              4.589e+03  7.403e+03   0.620 0.535463    
+Condition1RRAe             -1.165e+04  1.111e+04  -1.048 0.294682    
+Condition1RRAn              7.169e+03  7.101e+03   1.010 0.312992    
+Condition1RRNe              1.645e+04  2.181e+04   0.754 0.450837    
+Condition1RRNn              1.087e+04  1.452e+04   0.748 0.454563    
+Condition2Feedr            -7.497e+03  2.511e+04  -0.299 0.765304    
+Condition2Norm             -8.541e+03  2.269e+04  -0.376 0.706642    
+Condition2PosA              8.082e+04  3.288e+04   2.458 0.014156 *  
+Condition2RRAe             -1.090e+05  4.616e+04  -2.362 0.018400 *  
+Condition2RRNn              1.207e+04  3.178e+04   0.380 0.704225    
+BldgType2fmCon              3.239e+04  1.341e+04   2.414 0.015955 *  
+BldgTypeDuplex             -1.395e+04  6.562e+03  -2.126 0.033726 *  
+BldgTypeTwnhs               5.373e+03  1.402e+04   0.383 0.701669    
+BldgTypeTwnhsE              1.231e+04  1.329e+04   0.926 0.354538    
+OverallQual                 7.219e+03  1.014e+03   7.119 2.16e-12 ***
+OverallCond                 5.650e+03  7.497e+02   7.536 1.14e-13 ***
+YearBuilt                   2.932e+02  7.011e+01   4.182 3.17e-05 ***
+RoofMatlCompShg             5.445e+05  2.809e+04  19.385  < 2e-16 ***
+RoofMatlMembran             5.802e+05  3.736e+04  15.529  < 2e-16 ***
+RoofMatlMetal               5.307e+05  3.587e+04  14.792  < 2e-16 ***
+RoofMatlRoll                5.586e+05  3.679e+04  15.183  < 2e-16 ***
+RoofMatlTar&Grv             5.383e+05  2.955e+04  18.213  < 2e-16 ***
+RoofMatlWdShake             5.315e+05  2.953e+04  17.997  < 2e-16 ***
+RoofMatlWdShngl             5.604e+05  3.012e+04  18.603  < 2e-16 ***
+Exterior1stAsphShn         -1.404e+04  2.276e+04  -0.617 0.537529    
+Exterior1stBrkComm         -2.114e+04  2.337e+04  -0.904 0.366018    
+Exterior1stBrkFace          1.218e+04  7.154e+03   1.702 0.089013 .  
+Exterior1stCBlock          -1.045e+04  2.284e+04  -0.458 0.647322    
+Exterior1stCemntBd         -6.661e+01  7.518e+03  -0.009 0.992933    
+Exterior1stHdBoard         -5.540e+03  6.560e+03  -0.844 0.398647    
+Exterior1stImStucc         -1.507e+04  2.255e+04  -0.668 0.504101    
+Exterior1stMetalSd          5.733e+02  6.354e+03   0.090 0.928131    
+Exterior1stPlywood         -7.137e+03  6.893e+03  -1.035 0.300784    
+Exterior1stStone           -2.017e+04  1.837e+04  -1.098 0.272374    
+Exterior1stStucco           9.479e+03  8.023e+03   1.182 0.237660    
+Exterior1stVinylSd         -2.196e+00  6.421e+03   0.000 0.999727    
+Exterior1stWd Sdng         -1.453e+03  6.381e+03  -0.228 0.819944    
+Exterior1stWdShing         -8.198e+02  7.651e+03  -0.107 0.914699    
+MasVnrTypeBrkFace           6.432e+03  6.922e+03   0.929 0.352990    
+MasVnrTypeNone              1.519e+04  7.336e+03   2.071 0.038643 *  
+MasVnrTypeStone             1.687e+04  7.362e+03   2.291 0.022165 *  
+MasVnrArea                  5.964e+03  1.793e+03   3.327 0.000912 ***
+BsmtQualFa                 -1.757e+04  6.224e+03  -2.822 0.004873 ** 
+BsmtQualGd                 -1.775e+04  3.375e+03  -5.259 1.80e-07 ***
+BsmtQualTA                 -1.731e+04  4.141e+03  -4.179 3.20e-05 ***
+BsmtQualNone               -9.598e+03  3.175e+04  -0.302 0.762468    
+BsmtExposureGd              2.056e+04  3.093e+03   6.649 5.01e-11 ***
+BsmtExposureMn             -1.735e+03  3.077e+03  -0.564 0.572989    
+BsmtExposureNo             -1.284e+03  2.234e+03  -0.575 0.565486    
+BsmtExposureNone           -4.218e+03  2.111e+04  -0.200 0.841647    
+BsmtFinSF1                  5.465e+03  9.034e+02   6.049 2.10e-09 ***
+BsmtFinType2BLQ            -9.183e+03  7.212e+03  -1.273 0.203250    
+BsmtFinType2GLQ            -3.051e+03  9.109e+03  -0.335 0.737707    
+BsmtFinType2LwQ            -1.123e+04  6.827e+03  -1.645 0.100405    
+BsmtFinType2Rec            -6.841e+03  6.852e+03  -0.998 0.318370    
+BsmtFinType2Unf            -1.453e+04  5.850e+03  -2.483 0.013206 *  
+BsmtFinType2None           -1.175e+04  2.277e+04  -0.516 0.605818    
+BsmtUnfSF                   2.234e+03  9.291e+02   2.404 0.016401 *  
+HeatingGasW                 1.344e+04  7.405e+03   1.816 0.069766 .  
+HeatingGrav                -8.913e+03  9.945e+03  -0.896 0.370376    
+HeatingOthW                -3.360e+04  1.599e+04  -2.102 0.035830 *  
+HeatingWall                 1.272e+04  1.224e+04   1.039 0.299303    
+`1stFlrSF`                  6.496e+01  5.035e+00  12.900  < 2e-16 ***
+`2ndFlrSF`                  4.673e+01  4.726e+00   9.889  < 2e-16 ***
+BsmtFullBath                3.471e+03  1.859e+03   1.868 0.062123 .  
+FullBath                    4.673e+03  2.263e+03   2.065 0.039187 *  
+HalfBath                    3.596e+03  2.123e+03   1.693 0.090727 .  
+KitchenAbvGr               -1.637e+04  5.378e+03  -3.044 0.002401 ** 
+KitchenQualTA               1.973e+03  4.690e+03   0.421 0.674110    
+KitchenQualGd               5.769e+03  5.050e+03   1.142 0.253651    
+KitchenQualEx               2.965e+04  6.041e+03   4.908 1.08e-06 ***
+TotRmsAbvGrd                1.838e+04  4.230e+03   4.345 1.54e-05 ***
+FunctionalMaj2              3.185e+03  1.749e+04   0.182 0.855540    
+FunctionalMin1              3.624e+03  8.448e+03   0.429 0.668010    
+FunctionalMin2              8.511e+02  8.553e+03   0.100 0.920752    
+FunctionalMod              -4.581e+03  9.742e+03  -0.470 0.638309    
+FunctionalTyp               1.982e+04  6.997e+03   2.832 0.004724 ** 
+Fireplaces                  2.627e+03  1.366e+03   1.924 0.054649 .  
+GarageTypeAttchd            1.647e+04  1.060e+04   1.554 0.120558    
+GarageTypeBasment           2.042e+04  1.231e+04   1.659 0.097420 .  
+GarageTypeBuiltIn           2.521e+04  1.106e+04   2.279 0.022873 *  
+GarageTypeCarPort          -3.825e+02  1.871e+04  -0.020 0.983688    
+GarageTypeDetchd            1.853e+04  1.061e+04   1.747 0.080992 .  
+GarageYrBlt                -3.482e+00  2.027e+00  -1.717 0.086229 .  
+GarageArea                  2.347e+01  5.427e+00   4.324 1.70e-05 ***
+OpenPorchSF                -9.700e+01  3.641e+01  -2.664 0.007853 ** 
+ScreenPorch                 3.444e+01  1.315e+01   2.619 0.008957 ** 
+MiscVal                     6.794e+00  3.774e+00   1.800 0.072153 .  
+SaleTypeCon                 2.730e+04  1.627e+04   1.678 0.093646 .  
+SaleTypeConLD               6.944e+03  1.096e+04   0.634 0.526456    
+SaleTypeConLI               1.666e+03  1.204e+04   0.138 0.889934    
+SaleTypeConLw              -2.639e+03  1.358e+04  -0.194 0.845906    
+SaleTypeCWD                 7.485e+04  2.257e+04   3.317 0.000945 ***
+SaleTypeNew                -4.150e+03  1.686e+04  -0.246 0.805651    
+SaleTypeOth                 1.292e+04  1.336e+04   0.967 0.333569    
+SaleTypeWD                 -2.156e+03  4.532e+03  -0.476 0.634408    
+SaleConditionAdjLand        1.118e+04  1.222e+04   0.914 0.360731    
+SaleConditionAlloca         4.985e+03  8.410e+03   0.593 0.553489    
+SaleConditionFamily         7.729e+03  6.148e+03   1.257 0.209009    
+SaleConditionNormal         8.300e+03  3.016e+03   2.752 0.006037 ** 
+SaleConditionPartial        2.335e+04  1.625e+04   1.438 0.150894    
+WoodDeckSF_group(100,200]  -5.141e+01  1.904e+03  -0.027 0.978461    
+WoodDeckSF_group(200,300]   4.460e+03  2.334e+03   1.911 0.056290 .  
+WoodDeckSF_group(300,400]   7.091e+03  3.562e+03   1.991 0.046801 *  
+WoodDeckSF_group(400,900]   5.290e+03  4.264e+03   1.241 0.215025    
+OpenPorchSF_group(50,100]   9.279e+03  2.892e+03   3.209 0.001379 ** 
+OpenPorchSF_group(100,150]  9.890e+03  4.686e+03   2.111 0.035062 *  
+OpenPorchSF_group(150,200]  1.944e+04  6.741e+03   2.884 0.004023 ** 
+OpenPorchSF_group(200,550]  2.779e+04  9.999e+03   2.779 0.005563 ** 
+BedroomAbvGr4plus          -6.050e+03  1.475e+03  -4.102 4.46e-05 ***
+TotRmsAbvGrd10plus         -1.695e+04  4.392e+03  -3.859 0.000122 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 20750 on 937 degrees of freedom
+Multiple R-squared:  0.9366,	Adjusted R-squared:  0.9264 
+F-statistic: 91.68 on 151 and 937 DF,  p-value: < 2.2e-16
+
+
+95% CI Output-------------------------------------------------
+
+> confint(stepmodel)
+                                   2.5 %        97.5 %
+(Intercept)                -1.472182e+06 -8.796359e+05
+MSSubClass30-60            -3.266181e+03  8.013032e+03
+MSSubClass60-90            -9.567984e+03  2.361084e+03
+MSSubClass>110             -5.939576e+04 -8.589084e+03
+LotFrontage50-80           -2.007713e+03  5.317016e+03
+LotFrontage80-110          -2.515508e+03  7.081211e+03
+LotFrontage110-140         -1.307291e+04  5.399580e+03
+LotFrontage>140             1.345732e+04  4.553674e+04
+StreetPave                  2.328618e+03  5.030849e+04
+UtilitiesNoSeWa            -8.914201e+04  4.082965e+03
+LotConfigCulDSac            2.159487e+03  1.571261e+04
+LotConfigFR2               -1.123971e+04  5.090536e+03
+LotConfigFR3               -4.190557e+04  1.186276e+04
+LotConfigInside            -3.072772e+03  4.313863e+03
+NeighborhoodBlueste        -5.406778e+04  4.176793e+04
+NeighborhoodBrDale         -2.019887e+04  1.957533e+04
+NeighborhoodBrkSide        -2.566827e+04  9.173287e+03
+NeighborhoodClearCr        -3.106563e+03  3.441957e+04
+NeighborhoodCollgCr        -1.749790e+04  1.135038e+04
+NeighborhoodCrawfor        -4.297674e+03  2.980809e+04
+NeighborhoodEdwards        -3.223394e+04 -1.076748e+01
+NeighborhoodGilbert        -2.106921e+04  9.792585e+03
+NeighborhoodIDOTRR         -3.578017e+04  5.711476e+02
+NeighborhoodMeadowV        -3.161217e+04  8.315128e+03
+NeighborhoodMitchel        -3.128352e+04  9.601026e+02
+NeighborhoodNAmes          -2.993104e+04  1.072574e+03
+NeighborhoodNoRidge         1.596192e+04  5.021960e+04
+NeighborhoodNPkVill        -1.849592e+04  2.559563e+04
+NeighborhoodNridgHt         1.278058e+04  4.258942e+04
+NeighborhoodNWAmes         -3.049367e+04  1.654902e+03
+NeighborhoodOldTown        -3.524138e+04 -1.253191e+03
+NeighborhoodSawyer         -2.043283e+04  1.236043e+04
+NeighborhoodSawyerW        -1.907992e+04  1.209433e+04
+NeighborhoodSomerst        -9.859933e+03  2.029572e+04
+NeighborhoodStoneBr         2.892811e+04  6.290687e+04
+NeighborhoodSWISU          -3.726936e+04  2.837345e+02
+NeighborhoodTimber         -1.873028e+04  1.366771e+04
+NeighborhoodVeenker        -1.260314e+04  2.880486e+04
+Condition1Feedr            -1.007794e+04  1.097402e+04
+Condition1Norm              2.114378e+03  1.910915e+04
+Condition1PosA             -2.031837e+04  1.824400e+04
+Condition1PosN             -9.939443e+03  1.911822e+04
+Condition1RRAe             -3.345880e+04  1.015663e+04
+Condition1RRAn             -6.767310e+03  2.110458e+04
+Condition1RRNe             -2.635348e+04  5.926193e+04
+Condition1RRNn             -1.763610e+04  3.936658e+04
+Condition2Feedr            -5.676818e+04  4.177419e+04
+Condition2Norm             -5.306516e+04  3.598234e+04
+Condition2PosA              1.629000e+04  1.453600e+05
+Condition2RRAe             -1.995846e+05 -1.842096e+04
+Condition2RRNn             -5.029469e+04  7.442834e+04
+BldgType2fmCon              6.061041e+03  5.871256e+04
+BldgTypeDuplex             -2.683034e+04 -1.075874e+03
+BldgTypeTwnhs              -2.214338e+04  3.288858e+04
+BldgTypeTwnhsE             -1.377595e+04  3.840477e+04
+OverallQual                 5.228889e+03  9.208624e+03
+OverallCond                 4.178774e+03  7.121415e+03
+YearBuilt                   1.555894e+02  4.307827e+02
+RoofMatlCompShg             4.893480e+05  5.995885e+05
+RoofMatlMembran             5.068365e+05  6.534715e+05
+RoofMatlMetal               4.602528e+05  6.010574e+05
+RoofMatlRoll                4.864289e+05  6.308480e+05
+RoofMatlTar&Grv             4.802787e+05  5.962803e+05
+RoofMatlWdShake             4.735827e+05  5.895054e+05
+RoofMatlWdShngl             5.012516e+05  6.194850e+05
+Exterior1stAsphShn         -5.869590e+04  3.062412e+04
+Exterior1stBrkComm         -6.700595e+04  2.473031e+04
+Exterior1stBrkFace         -1.860788e+03  2.621883e+04
+Exterior1stCBlock          -5.528296e+04  3.437559e+04
+Exterior1stCemntBd         -1.482148e+04  1.468827e+04
+Exterior1stHdBoard         -1.841464e+04  7.335044e+03
+Exterior1stImStucc         -5.932407e+04  2.918368e+04
+Exterior1stMetalSd         -1.189696e+04  1.304354e+04
+Exterior1stPlywood         -2.066542e+04  6.391434e+03
+Exterior1stStone           -5.622407e+04  1.587555e+04
+Exterior1stStucco          -6.264694e+03  2.522368e+04
+Exterior1stVinylSd         -1.260355e+04  1.259916e+04
+Exterior1stWd Sdng         -1.397571e+04  1.107002e+04
+Exterior1stWdShing         -1.583485e+04  1.419535e+04
+MasVnrTypeBrkFace          -7.152149e+03  2.001713e+04
+MasVnrTypeNone              7.950841e+02  2.958700e+04
+MasVnrTypeStone             2.420742e+03  3.131479e+04
+MasVnrArea                  2.446239e+03  9.482295e+03
+BsmtQualFa                 -2.978097e+04 -5.349954e+03
+BsmtQualGd                 -2.437002e+04 -1.112385e+04
+BsmtQualTA                 -2.543452e+04 -9.180720e+03
+BsmtQualNone               -7.190474e+04  5.270778e+04
+BsmtExposureGd              1.449481e+04  2.663452e+04
+BsmtExposureMn             -7.773528e+03  4.303599e+03
+BsmtExposureNo             -5.668772e+03  3.099960e+03
+BsmtExposureNone           -4.563853e+04  3.720276e+04
+BsmtFinSF1                  3.691770e+03  7.237513e+03
+BsmtFinType2BLQ            -2.333727e+04  4.971210e+03
+BsmtFinType2GLQ            -2.092687e+04  1.482429e+04
+BsmtFinType2LwQ            -2.462359e+04  2.170746e+03
+BsmtFinType2Rec            -2.028883e+04  6.606753e+03
+BsmtFinType2Unf            -2.600720e+04 -3.044534e+03
+BsmtFinType2None           -5.643231e+04  3.292678e+04
+BsmtUnfSF                   4.104044e+02  4.057263e+03
+HeatingGasW                -1.088418e+03  2.797440e+04
+HeatingGrav                -2.843081e+04  1.060473e+04
+HeatingOthW                -6.497004e+04 -2.228033e+03
+HeatingWall                -1.131360e+04  3.674501e+04
+`1stFlrSF`                  5.507509e+01  7.483929e+01
+`2ndFlrSF`                  3.745824e+01  5.600737e+01
+BsmtFullBath               -1.762902e+02  7.118650e+03
+FullBath                    2.322315e+02  9.114760e+03
+HalfBath                   -5.715822e+02  7.762791e+03
+KitchenAbvGr               -2.692330e+04 -5.815516e+03
+KitchenQualTA              -7.231749e+03  1.117765e+04
+KitchenQualGd              -4.142722e+03  1.568019e+04
+KitchenQualEx               1.779439e+04  4.150363e+04
+TotRmsAbvGrd                1.007906e+04  2.668241e+04
+FunctionalMaj2             -3.113487e+04  3.750404e+04
+FunctionalMin1             -1.295544e+04  2.020442e+04
+FunctionalMin2             -1.593337e+04  1.763556e+04
+FunctionalMod              -2.369964e+04  1.453787e+04
+FunctionalTyp               6.084132e+03  3.354618e+04
+Fireplaces                 -5.248159e+01  5.307463e+03
+GarageTypeAttchd           -4.331854e+03  3.727479e+04
+GarageTypeBasment          -3.733741e+03  4.457655e+04
+GarageTypeBuiltIn           3.503372e+03  4.690846e+04
+GarageTypeCarPort          -3.709148e+04  3.632642e+04
+GarageTypeDetchd           -2.287687e+03  3.934864e+04
+GarageYrBlt                -7.460299e+00  4.968036e-01
+GarageArea                  1.281555e+01  3.411745e+01
+OpenPorchSF                -1.684545e+02 -2.554456e+01
+ScreenPorch                 8.635622e+00  6.025187e+01
+MiscVal                    -6.126250e-01  1.420144e+01
+SaleTypeCon                -4.624989e+03  5.922223e+04
+SaleTypeConLD              -1.456156e+04  2.844908e+04
+SaleTypeConLI              -2.195813e+04  2.529085e+04
+SaleTypeConLw              -2.928387e+04  2.400523e+04
+SaleTypeCWD                 3.056341e+04  1.191394e+05
+SaleTypeNew                -3.724300e+04  2.894288e+04
+SaleTypeOth                -1.328953e+04  3.913133e+04
+SaleTypeWD                 -1.105108e+04  6.738975e+03
+SaleConditionAdjLand       -1.281196e+04  3.516820e+04
+SaleConditionAlloca        -1.151935e+04  2.148931e+04
+SaleConditionFamily        -4.336402e+03  1.979434e+04
+SaleConditionNormal         2.381233e+03  1.421924e+04
+SaleConditionPartial       -8.528290e+03  5.523785e+04
+WoodDeckSF_group(100,200]  -3.787085e+03  3.684272e+03
+WoodDeckSF_group(200,300]  -1.198219e+02  9.039887e+03
+WoodDeckSF_group(300,400]   1.005425e+02  1.408204e+04
+WoodDeckSF_group(400,900]  -3.077718e+03  1.365846e+04
+OpenPorchSF_group(50,100]   3.603812e+03  1.495498e+04
+OpenPorchSF_group(100,150]  6.944339e+02  1.908593e+04
+OpenPorchSF_group(150,200]  6.208795e+03  3.266822e+04
+OpenPorchSF_group(200,550]  8.163590e+03  4.741151e+04
+BedroomAbvGr4plus          -8.944794e+03 -3.155306e+03
+TotRmsAbvGrd10plus         -2.556800e+04 -8.329650e+03
