@@ -1,0 +1,5 @@
+Predictive Models	Adjusted R2	CV PRESS	Kaggle Score
+Forward  	        0.9292	    324810947     -
+Backward	        0.9305	    370532698     -	
+Stepwise	        0.9264	    370532698     -	
+CUSTOM	             -            -         -		
