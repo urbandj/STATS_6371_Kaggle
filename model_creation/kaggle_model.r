@@ -22,7 +22,7 @@ full_training =ames_train
 training_corr = full_training %>% 
   dplyr::select(`1stFlrSF`,       
                 `2ndFlrSF`,      
-                `3SsnPorch`,     
+                X3SsnPorch,     
                 BedroomAbvGr4plus,       
                 BsmtFinSF1,       
                 BsmtFinSF2,      
