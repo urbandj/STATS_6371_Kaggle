@@ -589,7 +589,11 @@ sum(is.na(training_data$Electrical))
 
 
 ggplot(data = training_data, aes(x=training_data$Electrical, y=SalePrice, color= Electrical))+geom_point(stat ="identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
+  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$Electrical]), 
+                                           max(training_data$SalePrice[training_data$Electrical]))) +
+  scale_y_continuous(labels=dollar_format(prefix="$"))
 
 training_data%>%skim
 #garage finish
