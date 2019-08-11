@@ -569,7 +569,7 @@ sum(is.na(training_data$HeatingQC))
 #1=Y	Yes
 CentralAir<-ifelse(training_data$CentralAir=="Y",1, ifelse(training_data$CentralAir=="N", 0,0))
 CentralAir [is.na(CentralAir)] <- 0
-ggplot(data = training_data, aes(x=TotalBsmtSF, y=SalePrice))+geom_point(stat ="identity")
+ggplot(data = training_data, aes(x=CentralAir, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$CentralAir))
 
 #Electrical (Ordinal): Electrical system
