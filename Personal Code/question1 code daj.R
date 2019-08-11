@@ -58,7 +58,7 @@ ggplot(data = NBH, aes(x=Neighborhood, y=logGrLivArea, color=SalePrice))+geom_po
 ggplot(data = NBH, aes(x=Neighborhood, y=logPrice, color=SalePrice))+geom_point(stat ="identity")
 
 # planning to use the logGrlivArea and LogPrice  Need to confirm the data seen as outliers
-ggplot(data = NBH, aes(x=logGrLivArea, y=logPrice, color=Neighborhood))+geom_point(stat ="identity")
+ggplot(data = NBH, aes(x=logGrLivArea, y=logPrice, color=Neighborhood))+geom_smooth(method=lm, se=FALSE, size=1.2)+geom_point()
 
 # regession model with interaction variable
 test_sale_price<-lm( data = NBH, logPrice~logper100sqft + Neighborhood + logGrLivArea*Neighborhood )
