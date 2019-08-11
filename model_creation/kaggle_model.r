@@ -15,7 +15,7 @@ library(MASS)#studentized residuals
 library(caret)
 library(stats)
 drop<- c("Exterior2nd","BsmtFinSF2","ExterCond","GrLivArea", "logYearBuilt","GarageCars", "GarageCond","GarageQual", "porch_yn", "FireplaceY","GarageTypeY",
-         "porchArea", "BsmtFinType1", "OpenPorchSF_y","TotalBath","logGrLivArea")
+         "porchArea", "BsmtFinType1", "OpenPorchSF_y","TotalBath","logGrLivArea", "logSalePrice","totalSF","TotalBsmtSF","ExterQual")
 full_training = full_training[,!(names(full_training) %in% drop)]
 
 full_training=ame
@@ -60,7 +60,7 @@ corrplot(corr_object, method = "number")#use this in write-up
 
 #Initial Model----
 options(max.print=999999)
-full.model <- lm(logSalePrice ~., data = full_training)
+full.model <- lm(SalePrice ~., data = full_training)
 summary(full.model)
 vif(full.model)
 
@@ -94,15 +94,15 @@ vif(full.model2)
 #Outlier Check----
 plot(full.model)
 
-ols_plot_cooksd_bar(full.model2)
+ols_plot_cooksd_bar(full.model)
 
 #Outlier Removal----
-full_training_no <- full_training_noVIF[-c(74,266,416,547,548,651,892,922,314,427,1029,547),] 
+full_training_no <- full_training_noVIF[-c(617,389,437,514,146,617,256,664,883,1035),] 
 #cooks plot outliers - 427,314,1029,127,547
 full_training_no$BsmtFinType1 <- relevel(full_training_no$BsmtFinType1, ref = "None")
 
 #Model outliers addressed----
-new_model = lm(logSalePrice~., data = full_training_no)#interaction terms will need to be added here
+new_model = lm(SalePrice~., data = full_training_no)#interaction terms will need to be added here
 summary(new_model) #R^2 = 0.9361
 vif(new_model)
 
