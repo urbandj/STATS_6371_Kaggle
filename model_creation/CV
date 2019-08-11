@@ -1,0 +1,109 @@
+#Cross Validation----
+library(DAAG)
+library(forecast)
+library(tidyverse)
+library(skimr) 
+library(tangram)
+library(car)
+library(fastDummies)
+library(rlang)
+library(olsrr)
+library(roperators)
+library(DAAG)
+library(ggplot2)
+library(dplyr)
+library(RCurl)
+
+trainURL <- getURL("https://raw.githubusercontent.com/urbandj/STATS_6371_Kaggle/master/train.csv")
+traindata <- read.csv(text = trainURL)
+
+testURL <- getURL("https://raw.githubusercontent.com/urbandj/STATS_6371_Kaggle/master/test.csv")
+testdata <-read.csv(text = testdata)
+
+
+#Train the model - Forward
+Model1_forward = lm(logSalePrice~Id + MSSubClass + MSZoning + LandContour + 
+                      Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
+                      OverallQual + OverallCond + YearRemodAdd + RoofMatl + Exterior1st + 
+                      Exterior2nd + MasVnrType + MasVnrArea + ExterQual + ExterCond + 
+                      Foundation + BsmtQual + BsmtCond + BsmtFinType1 + BsmtFinSF1 + 
+                      BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                      CentralAir + Electrical + FireplaceQu + GarageArea + GarageQual + 
+                      ScreenPorch + MoSold + YrSold + SaleType + SaleCondition + 
+                      GarageCars_f + pool_yn + porch_yn + Fence_f + WoodDeckSF_group + 
+                      OpenPorchSF_group + EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + 
+                      KitchenQual.Fac + KitchenQual.FacNum + TotRmsAbvGrd10plus + 
+                      GarageTypeY + GarageCond.Fac + GarageCond.N + PavedDrive.Fac + 
+                      PavedDriveY + MSSubClass_group + LotFrontage_group + LotArea_group + 
+                      YearBuilt.b + YearRemodAdd.b + RoofStyleY + MasVnrArea.b + 
+                      ExterQual.n + logGrLivArea - logGrLivArea - GarageCond.N - 
+                      PavedDriveY - porch_yn - BsmtFinType1 - ExterQual.n, data = traindata)
+summary(Model1_forward)
+
+#Generate prediction
+Model1_forwardPreds = predict(Model1_forward,interval = "predict",newdata = testdata)
+as.data.frame(Model1_forwardPreds)
+
+#Find MSPE and check
+MSPE = data.frame(Observed = testdata$logSalesPrice, Predicted = Model1_forwardPreds)
+MSPE$Residual = MSPE$Observed - MSPE$Predicted
+MSPE
+mean(MSPE$SquaredResidual)
+
+#Train the model - Backward
+Model2_backward = lm(logSalePrice ~ MSSubClass + MSZoning + Neighborhood + 
+                       Condition1 + HouseStyle + OverallQual + OverallCond + YearRemodAdd + 
+                       RoofMatl + Exterior1st + MasVnrArea + Foundation + BsmtQual + 
+                       BsmtFinSF1 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                       CentralAir + FireplaceQu + GarageArea + GarageQual + ScreenPorch + 
+                       SaleType + SaleCondition + GarageCars_f + pool_yn + WoodDeckSF_group + 
+                       TotalBath + BedroomAbvGr4plus + KitchenQual.Fac + TotRmsAbvGrd10plus + 
+                       GarageTypeY + GarageCond.Fac + PavedDrive.Fac + MSSubClass_group + 
+                       LotFrontage_group + LotArea_group + YearBuilt.b, data = traindata)
+summary(Model2_backward)
+
+#Generate prediction
+Model2_backwardPreds = predict(Model2_backward,interval = "predict",newdata = testdata)
+as.data.frame(Model2_backwardPreds)
+
+#Find MSPE and check
+MSPE = data.frame(Observed = testdata$logSalesPrice, Predicted = Model2_backwardPreds)
+MSPE$Residual = MSPE$Observed - MSPE$Predicted
+MSPE
+mean(MSPE$SquaredResidual)
+
+#Train the model - Stepwise (both)
+Model3_StepBoth = lm(logSalePrice ~ MSSubClass + MSZoning + Neighborhood + 
+                                      Condition1 + HouseStyle + OverallQual + OverallCond + YearRemodAdd + 
+                                      RoofMatl + Exterior1st + MasVnrArea + Foundation + BsmtQual + 
+                                      BsmtFinSF1 + BsmtFinSF2 + BsmtUnfSF + Heating + HeatingQC + 
+                                      CentralAir + FireplaceQu + GarageArea + GarageQual + ScreenPorch + 
+                                      SaleType + SaleCondition + GarageCars_f + pool_yn + WoodDeckSF_group + 
+                                      TotalBath + BedroomAbvGr4plus + KitchenQual.Fac + TotRmsAbvGrd10plus + 
+                                      GarageTypeY + GarageCond.Fac + PavedDrive.Fac + MSSubClass_group + 
+                                      LotFrontage_group + LotArea_group + YearBuilt.b, data = traindata)
+summary(Model3_StepBoth)
+
+#Generate prediction
+Model3_StepBothPreds = predict(Model3_StepBoth,interval = "predict",newdata = testdata)
+as.data.frame(Model2_backwardPreds)
+
+#Find MSPE and check
+MSPE = data.frame(Observed = testdata$logSalesPrice, Predicted = Model3_StepBothPreds)
+MSPE$Residual = MSPE$Observed - MSPE$Predicted
+MSPE
+mean(MSPE$SquaredResidual)
+
+#Train the model - Custom
+Model4_Custom = lm(logSalePrice~.-logGrLivArea-GarageCond.N -PavedDriveY-porch_yn -BsmtFinType1-ExterQual.n , data = traindata)
+summary(Model4_Custom)
+
+#Generate prediction
+Model4_CustomPreds = predict(Model4_Customth,interval = "predict",newdata = testdata)
+as.data.frame(Model4_CustomPreds)
+
+#Find MSPE and check
+MSPE = data.frame(Observed = testdata$logSalesPrice, Predicted = Model4_CustomPreds)
+MSPE$Residual = MSPE$Observed - MSPE$Predicted
+MSPE
+mean(MSPE$SquaredResidual)
