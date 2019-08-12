@@ -1,37 +1,13 @@
-install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang','roperators'))
-require(tidyverse) #general data wrangling tools
-require(skimr) #summary stats
-require(tangram) #has is.categorical() function, useful for creating tables
-require(car) # Regression tools
-require(fastDummies) # creates dummy variables
-require(rlang)
-require(olsrr)
-require(roperators) #used to convert NAs to to different values
-require(DAAG)
-require(ggplot2)
-require(dplyr)
-require(plyr)
-library(mefa4)
-str(train)
+train<- train
+test<- test
 
-#create training data object, please refer to this variable when making modificaitons to the dataset----
-#'if reading from local source
-require(readr)
-train<- read.csv("c:/Users/daj0079/Desktop/SMU/train.csv")
-testing<- read.csv("c:/Users/daj0079/Desktop/SMU/test.csv")
-
-
-testing[["SalePrice"]]<-"none"
-
-training_data<-rbind(train,testing)
- 
+test[["SalePrice"]]<-0
+training_data<-rbind(train,test)
+skim(test)
 #Jeff's Data----
-
-training_data <-training_data[-c(7)]
-drop<- c("PoolQC","MiscFeature")
+drop<- c("PoolQC","MiscFeature", "LotShape")
 training_data = training_data[,!(names(training_data) %in% drop)]
 names(training_data)
-
 
 training_data = training_data %>% 
   mutate(pool_yn = if_else(PoolArea == 0,0,1)) %>% #not good predictor, 7 cases with data
@@ -46,71 +22,46 @@ training_data$Fence = factor(training_data$Fence, levels=c("None", "GdPrv", "GdW
 training_data$Fence %na<-% "None" #roperators package
 sum(is.na(training_data$Fence))
 
-#training_data%>%skim
-
 #WoodDeckSF Categorical Buckets from Quantitiative Data
 training_data$WoodDeckSF %na<-% 0
 training_data$WoodDeckSF_group<-cut(training_data$WoodDeckSF, c(0,100,200,300,400,900), ordered_result = FALSE, include.lowest = TRUE)
-ggplot(data = training_data, aes(x=WoodDeckSF_group, y=logSalePrice))+geom_point(stat ="identity")
+
 
 #OpenPorchSF Categorical Buckets from Quantitiative Data
 training_data$OpenPorchSF %na<-% 0
 training_data$OpenPorchSF_group<-cut(training_data$OpenPorchSF, c(0,50,100,150,200,550), ordered_result = FALSE, include.lowest = TRUE)
-ggplot(data = training_data, aes(x=OpenPorchSF_group, y=logSalePrice))+geom_point(stat ="identity")
 
 #EnclosedPorch Categorical Buckets from Quantitiative Data
-training_data$EnclosedPorch_group %na<-% 0
+training_data$EnclosedPorch %na<-% 0
 training_data$EnclosedPorch_group<-cut(training_data$EnclosedPorch, c(0,50,100,150,200,600), ordered_result = FALSE, include.lowest = TRUE)
-ggplot(data = training_data, aes(x=EnclosedPorch_group, y=logSalePrice))+geom_point(stat ="identity")
-
-#24 Observations of 3SsnPorch, not good predictor
-
-
-#'pool not good predictor, 7 cases with data
-#'MiscFeature not good predictor
-#'Interaction variables for porch
-#' porch_yn*3SsnPorch
-#' porch_yn*EnclosedPorch
-#' porch_yn*OpenPorchSF
-#' porch_yn*ScreenPorch
-
-
 
 #Adam's Data----
 
-
-
 # USE THIS ONE !! Bath FullBath + (0.5 * HalfBath) RECODE to THREE PLUS
 training_data$TotalBath <- training_data$FullBath + (0.5 * training_data$HalfBath)
-ggplot(data = training_data, aes(x=TotalBath, y=logSalePrice))+geom_point(stat ="identity")
+
 sum(is.na(training_data$TotalBath))
 
 # BedroomAbvGr 4+ bedrooms
 training_data$BedroomAbvGr4plus <- ifelse(training_data$BedroomAbvGr >= 4, 4, training_data$BedroomAbvGr)  
-ggplot(data = training_data, aes(x=BedroomAbvGr4plus, y=logSalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$BedroomAbvGr4plus))
 
 drop<- c("BedroomAbvGr")
 training_data = training_data[,!(names(training_data) %in% drop)]
 
-
-
 Qual4 <- c("Fa", "TA", "Gd", "Ex") # no "Po" data
 training_data$KitchenQual <- factor(x=training_data$KitchenQual, levels=Qual4, ordered = FALSE)
-
-ggplot(data = training_data, aes(x=KitchenQual, y=logSalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$KitchenQual))
 
 #POSSIBLE TotRmsAbvGrd MAY NEED TO RECODE FOR 10+
 training_data$TotRmsAbvGrd10plus <- ifelse(training_data$TotRmsAbvGrd >= 10, 10, training_data$TotRmsAbvGrd) 
-ggplot(data = training_data, aes(x=TotRmsAbvGrd10plus, y=logSalePrice))+geom_point(stat ="identity")
 
 drop<- c("TotRmsAbvGr")
 training_data = training_data[,!(names(training_data) %in% drop)]
 
 # Fireplaces
 training_data$FireplaceY <- ifelse(training_data$Fireplaces == 0, 0, 1)  
-ggplot(data = training_data, aes(x=FireplaceY, y=logSalePrice))+geom_point(stat ="identity")
+#ggplot(data = training_data, aes(x=FireplaceY, y=logSalePrice))+geom_point(stat ="identity")
 
 drop<- c("Fireplace")
 training_data = training_data[,!(names(training_data) %in% drop)]
@@ -118,44 +69,34 @@ training_data = training_data[,!(names(training_data) %in% drop)]
 
 # GarageType different values "2Types Attchd Basment BuiltIn CarPort Detchd"
 training_data$GarageType %na<-% "Detchd"
-ggplot(data = training_data, aes(x=GarageType, y=logSalePrice))+geom_point(stat ="identity")
+
 training_data$GarageTypeY <- ifelse(training_data$GarageType == 'Attchd' | training_data$GarageType == 'BuiltIn', 1, 0)  
-ggplot(data = training_data, aes(x=GarageTypeY, y=logSalePrice))+geom_point(stat ="identity")
 
 ##### strange may want check buckets
 #Garage Year Built
 training_data$GarageYrBlt %na<-% 0
-ggplot(data = training_data, aes(x=GarageYrBlt, y=logSalePrice))+geom_point(stat ="identity")
 
 # GarageCars recode Significant 0, 1, 2, 3+ 
 GarCar <- c(0, 1, 2, 3, 4) 
 training_data$GarageCars<- factor(x=training_data$GarageCars, levels=GarCar, ordered = FALSE)
 #training_data$GarageCars3plus <- ifelse(training_data$GarageCars == 4, 3, training_data$GarageCars) 
-#ggplot(data = training_data, aes(x=GarageCars3plus, y=logSalePrice))+geom_point(stat ="identity")
-ggplot(data = training_data, aes(x=GarageCars, y=logSalePrice))+geom_point(stat ="identity")
 
 sum(is.na(training_data$GarageCars))
 
 # GarageArea not as useful
-
 training_data$GarageCond %na<-% 0
 
 Qual5 <- c("Po", "Fa", "TA", "Gd", "Ex") 
 training_data$GarageCond <- factor(x=training_data$GarageCond, levels=Qual5, ordered = FALSE)
 training_data$GarageCond <- as.numeric(training_data$GarageCond)
 training_data$GarageCond %na<-% 0
-ggplot(data = training_data, aes(x=GarageCond, y=logSalePrice))+geom_point(stat ="identity")
-
 
 # PavedDrive
 Pave <- c("N", "P", "Y") 
 training_data$PavedDrive <- factor(x=training_data$PavedDrive, levels=Pave, ordered = FALSE)
-ggplot(data = training_data, aes(x=PavedDrive, y=logSalePrice))+geom_point(stat ="identity")
 
 # PavedDriveY POSSIBLE
 #training_data$PavedDriveY <- ifelse(training_data$PavedDrive == "Y", 1, 0)  
-
-#ggplot(data = training_data, aes(x=PavedDriveY, y=logSalePrice))+geom_point(stat ="identity")
 
 
 #Reannan's Data----
@@ -176,8 +117,6 @@ group_MSSubClass <- function(MSSubClass){
 }
 training_data$MSSubClass <- sapply(training_data$MSSubClass,group_MSSubClass)
 training_data$MSSubClass<- factor(training_data$MSSubClass, levels = c('0-30','30-60','60-90','90-110','>110'), ordered = FALSE)
-ggplot(data = training_data, aes(x=MSSubClass, y=logSalePrice))+geom_point(stat ="identity")
-
 
 #MSZoning
 #1=C (all)
@@ -186,10 +125,7 @@ ggplot(data = training_data, aes(x=MSSubClass, y=logSalePrice))+geom_point(stat 
 #4=RL
 #5=RM
 #MSZoningFactor%>% skim
-
-ggplot(data = training_data, aes(x=MSZoning, y=logSalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$MSZoning))
-
 # training_data$LotFrontage %na<-% 0
 
 as.numeric(training_data$LotFrontage)
@@ -210,9 +146,7 @@ group_LotFrontage <- function(LotFrontage){
 training_data$LotFrontage <- sapply(training_data$LotFrontage,group_LotFrontage)
 training_data$LotFrontage <- factor(training_data$LotFrontage, levels = c('0-50','50-80','80-110','110-140','>140'), ordered = FALSE)
 #levels(training_data$LotFrontage_group)
-ggplot(data = training_data, aes(x=LotFrontage, y=logSalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$LotFrontage))
-
 
 #LotArea Categorical Buckets from Quantitiative Data
 as.numeric(training_data$LotArea)
@@ -229,7 +163,6 @@ group_LotArea <- function(LotArea){
 }
 training_data$LotArea <- sapply(training_data$LotArea,group_LotArea)
 training_data$LotArea <- factor(training_data$LotArea, levels = c('0-3000','3000-6000','6000-9000','>9000'), ordered = FALSE)
-ggplot(data = training_data, aes(x=training_data$LotArea, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$LotArea))
 
 
@@ -238,7 +171,7 @@ sum(is.na(training_data$LotArea))
 #2=Mod
 #3=Sev
 ordered(training_data$LandSlope)
-ggplot(data = training_data, aes(x=training_data$LandSlope, y=SalePrice))+geom_point(stat ="identity")
+#ggplot(data = training_data, aes(x=training_data$LandSlope, y=SalePrice))+geom_point(stat ="identity")
 
 #Neighborhood
 #1=Blmngtn
@@ -267,10 +200,6 @@ ggplot(data = training_data, aes(x=training_data$LandSlope, y=SalePrice))+geom_p
 #24=Timber
 #25=Veenker
 ordered(training_data$Neighborhood)
-ggplot(data = training_data, aes(x=training_data$Neighborhood, y=SalePrice))+geom_point(stat ="identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
-
-
 
 #OverallQual
 #1=1
@@ -284,9 +213,6 @@ ggplot(data = training_data, aes(x=training_data$Neighborhood, y=SalePrice))+geo
 #9=9
 #10=10
 ordered(training_data$OverallQual)
-ggplot(data = training_data, aes(x=training_data$OverallQual, y=SalePrice))+geom_point(stat ="identity")
-
-
 
 #OverallCond
 #1=1
@@ -299,11 +225,6 @@ ggplot(data = training_data, aes(x=training_data$OverallQual, y=SalePrice))+geom
 #8=8
 #9=9
 ordered(training_data$OverallCond)
-ggplot(data = training_data, aes(x=training_data$OverallCond, y=SalePrice))+geom_point(stat ="identity")
-
-
-
-
 
 #YearBuilt 
 #1=1870-1900 
@@ -316,8 +237,6 @@ training_data = training_data %>%
 hist(training_data$logYearBuilt)
 sum(is.na(training_data$YearBuilt))
 
-
-training_data%>%skim
 ##Binned variable
 #YearRemodAdd.b 
 #1=1950-1960
@@ -326,19 +245,10 @@ training_data%>%skim
 #4=1981-1990
 #5=1991-2000
 #6=2001+
-
 training_data$YearRemodAdd[is.na(training_data$YearRemodAdd)] <- "NONE"
-training_data$YearRemodAdd
-
-ggplot(data = training_data, aes(x=YearRemodAdd, y=logSalePrice))+geom_point(stat ="identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5))
 
 
 #David's Data----
-
-
-
-
 ##Binned variable
 #MasVnrArea.b 
 #0=0 or Na
@@ -355,8 +265,6 @@ MasVnrArea.b [is.na(MasVnrArea.b)] <- 0
 training_data$MasVnrArea<- MasVnrArea.b
 fct_explicit_na(training_data$MasVnrArea, na_level = "None")->training_data$MasVnrArea
 sum(is.na(training_data$MasVnrArea))
-ggplot(data = training_data, aes(x=training_data$MasVnrArea, y=SalePrice))+geom_point(stat ="identity")
-
 
 #USE THIS ONE
 #Exter Qual (Ordinal): Evaluates the quality of the material on the exterior 
@@ -368,7 +276,6 @@ ggplot(data = training_data, aes(x=training_data$MasVnrArea, y=SalePrice))+geom_
 EXTQ2<-ifelse(training_data$ExterQual=="Fa",1, ifelse(training_data$ExterQual=="TA", 2,ifelse(training_data$ExterQual=="Gd", 3, ifelse(training_data$ExterQual=="Ex",4,0))))
 ExterQual<-EXTQ2
 training_data$ExterQual<- ExterQual
-ggplot(data = training_data, aes(x=training_data$ExterQual, y=SalePrice))+geom_point(stat ="identity")
 
 
 #Exter Cond (Ordinal): Evaluates the present condition of the material on the exterior
@@ -379,9 +286,6 @@ ggplot(data = training_data, aes(x=training_data$ExterQual, y=SalePrice))+geom_p
 #1=Po	Poor
 ExterCond<-ifelse(training_data$ExterCond=="Po",1, ifelse(training_data$ExterCond=="Fa", 2,ifelse(training_data$ExterCond=="TA", 3, 
                                                                                                   ifelse(training_data$ExterCond=="Gd",4,ifelse(training_data$ExterCond=="Ex",5,0)))))
-
-ggplot(data = training_data, aes(x=training_data$ExterCond, y=SalePrice))+geom_point(stat ="identity")
-
 
 #USE THIS ONE
 #Bsmt Qual (Ordinal): Evaluates the height of the basement
@@ -395,8 +299,6 @@ BsmtQual<-ifelse(training_data$BsmtQual=="Po",1, ifelse(training_data$BsmtQual==
                                                                                                ifelse(training_data$BsmtQual=="Gd",4,ifelse(training_data$BsmtQual=="Ex",5,ifelse(training_data$BsmtQual=="NA",0,0))))))
 BsmtQual [is.na(BsmtQual)] <- "NONE"
 fct_explicit_na(training_data$BsmtQual, na_level = "None")->training_data$BsmtQual
-
-ggplot(data = training_data, aes(x=training_data$BsmtQual, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$BsmtQual))
 
 #Bsmt Cond (Ordinal): Evaluates the general condition of the basement
@@ -409,7 +311,6 @@ sum(is.na(training_data$BsmtQual))
 BsmtCond<-ifelse(training_data$BsmtCond=="Po",1, ifelse(training_data$BsmtCond=="Fa", 2,ifelse(training_data$BsmtCond=="TA", 3, 
                                                                                                ifelse(training_data$BsmtCond=="Gd",4,ifelse(training_data$BsmtCond=="Ex",5,ifelse(training_data$BsmtCond=="NA",0,0))))))
 fct_explicit_na(training_data$BsmtCond, na_level = "TA")->training_data$BsmtCond
-ggplot(data = training_data, aes(x=training_data$BsmtCond, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$BsmtCond))
 
 #Bsmt Exposure	(Ordinal): Refers to walkout or garden level walls
@@ -422,7 +323,6 @@ BsmtExposure<-ifelse(training_data$BsmtExposure=="No",1, ifelse(training_data$Bs
                                                                                                            ifelse(training_data$BsmtExposure=="Gd",4,ifelse(training_data$BsmtCond=="NA",0,0)))))
 fct_explicit_na(training_data$BsmtExposure, na_level = "None")->training_data$BsmtExposure
 sum(is.na(training_data$BsmtExposure))
-ggplot(data = training_data, aes(x=training_data$BsmtExposure, y=SalePrice))+geom_point(stat ="identity")
 
 #BsmtFin Type 1	(Ordinal): Rating of basement finished area
 #6=GLQ	Good Living Quarters
@@ -437,10 +337,6 @@ BsmtFinType1<-ifelse(training_data$BsmtFinType1=="Unf",1, ifelse(training_data$B
 
 fct_explicit_na(training_data$BsmtFinType1, na_level = "None")->training_data$BsmtFinType1
 sum(is.na(training_data$BsmtFinType1))
-ggplot(data = training_data, aes(x=training_data$BsmtFinType1, y=SalePrice))+geom_point(stat ="identity")
-
-
-
 
 #Binned
 #BsmtFin SF 1 (Continuous): Type 1 finished square feet
@@ -461,10 +357,7 @@ BSMT1<-c(0,250,500,750,1000,1250, 1500, 1750,2000,6500)
 BsmtFinSF1.b<-.bincode(BsmtFinSF1.n,BSMT1, right = TRUE,include.lowest = FALSE)
 BsmtFinSF1.b[is.na(BsmtFinSF1.b)] <- 0
 training_data$BsmtFinSF1<- BsmtFinSF1.b
-ggplot(data = training_data, aes(x=BsmtFinSF1, y=SalePrice))+geom_point(stat ="identity")
-
 sum(is.na(training_data$BsmtFinSF1))
-
 
 #interesting fact to look at total living area vs basement 
 #BsmtFin Type 2	(Ordinal): Rating of basement finished area(if multiple types)
@@ -479,7 +372,6 @@ BsmtFinType2<-ifelse(training_data$BsmtFinType2=="Unf",1, ifelse(training_data$B
                                                                                                              ifelse(training_data$BsmtFinType2=="BLQ",4,ifelse(training_data$BsmtFinType2=="ALQ",5,ifelse(training_data$BsmtFinType2=="GLQ",6,0))))))
 fct_explicit_na(training_data$BsmtFinType2, na_level = "None")->training_data$BsmtFinType2
 sum(is.na(training_data$BsmtFinType2))
-ggplot(data = training_data, aes(x=BsmtFinType2, y=SalePrice))+geom_point(stat ="identity")
 
 #BINNED
 #BsmtFinType 2	(Ordinal): Rating of basement finished area (if multiple types)
@@ -497,8 +389,6 @@ BSMT2<-c(0,250,500,750,1000,1250, 1500)
 BsmtFinSF2.b<-.bincode(BsmtFinSF2.n,BSMT2, right = TRUE,include.lowest = FALSE)
 BsmtFinSF2.b[is.na(BsmtFinSF2.b)] <- 0
 training_data$BsmtFinSF2 <- BsmtFinSF2.b
-ggplot(data = training_data, aes(x=BsmtFinSF2, y=SalePrice))+geom_point(stat ="identity")
-
 sum(is.na(training_data$BsmtFinSF2))
 
 #BINNED
@@ -520,7 +410,6 @@ UNFBSMT<-c(0,250,500,750,1000,1250, 1500, 1750,2000,6500)
 BsmtUnfSF.b<-.bincode(BsmtUnfSF.n,UNFBSMT, right = TRUE,include.lowest = FALSE)
 BsmtUnfSF.b[is.na(BsmtUnfSF.b)] <- 0
 training_data$BsmtUnfSF <- BsmtUnfSF.b
-ggplot(data = training_data, aes(x=BsmtUnfSF, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$BsmtUnfSF))
 
 
@@ -546,10 +435,7 @@ TOTBSMT<-c(0,250,500,750,1000,1250, 1500, 1750,2000,2250,2500,2750,3000,7000)
 TotalBsmtSF.b<-.bincode(TotalBsmtSF.n,TOTBSMT, right = TRUE,include.lowest = FALSE)
 TotalBsmtSF.b[is.na(TotalBsmtSF.b)] <- 0
 training_data$TotalBsmtSF <- TotalBsmtSF.b
-ggplot(data = training_data, aes(x=TotalBsmtSF, y=SalePrice))+geom_point(stat ="identity")
-sum(is.na(training_data$BsmtSF))
-
-
+sum(is.na(training_data$TotalBsmtSF))
 
 # Possible
 #HeatingQC (Ordinal): Heating quality and condition
@@ -561,7 +447,6 @@ sum(is.na(training_data$BsmtSF))
 HeatingQC<-ifelse(training_data$HeatingQC=="Po",1, ifelse(training_data$HeatingQC=="Fa", 2,ifelse(training_data$HeatingQC=="TA", 3, 
                                                                                                   ifelse(training_data$HeatingQC=="Gd",4,ifelse(training_data$HeatingQC=="Ex",5,0)))))
 
-ggplot(data = training_data, aes(x=TotalBsmtSF, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$HeatingQC))
 
 #Central Air (Nominal): Central air conditioning
@@ -569,7 +454,6 @@ sum(is.na(training_data$HeatingQC))
 #1=Y	Yes
 CentralAir<-ifelse(training_data$CentralAir=="Y",1, ifelse(training_data$CentralAir=="N", 0,0))
 CentralAir [is.na(CentralAir)] <- 0
-ggplot(data = training_data, aes(x=CentralAir, y=SalePrice))+geom_point(stat ="identity")
 sum(is.na(training_data$CentralAir))
 
 #Electrical (Ordinal): Electrical system
@@ -582,20 +466,10 @@ sum(is.na(training_data$CentralAir))
 Electrical<-ifelse(training_data$Electrical=="Mix",1, ifelse(training_data$Electrical=="FuseP", 2,ifelse(training_data$Electrical=="FuseF", 3, 
                                                                                                          ifelse(training_data$Electrical=="FuseA",4,ifelse(training_data$Electrical=="SBrkr",5,ifelse(training_data$Electrical=="NA's",0,0))))))
 
-
 fct_explicit_na(training_data$Electrical, na_level = "NONE")->training_data$Electrical
 fct_explicit_na(training_data$Exterior2nd, na_level = "NONE")->training_data$Exterior2nd
 sum(is.na(training_data$Electrical))
 
-require(scales)
-ggplot(data = training_data, aes(x=training_data$Electrical, y=SalePrice, color= Electrical))+geom_point(stat ="identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 0, vjust=0.5)) +
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_y_continuous(label=comma, limits=c(min(training_data$SalePrice[training_data$Electrical]), 
-                                           max(training_data$SalePrice[training_data$Electrical]))) +
-  scale_y_continuous(labels=dollar_format(prefix="$"))
-
-training_data%>%skim
 #garage finish
 
 fct_explicit_na(training_data$FireplaceQu, na_level = "NONE")->training_data$FireplaceQu
@@ -614,32 +488,60 @@ fct_explicit_na(training_data$WoodDeckSF_group, na_level = "NONE")->training_dat
 training_data$WoodDeckSF_group[is.na(training_data$WoodDeckSF_group)] <- "NONE"
 training_data$GarageArea [is.na(training_data$GarageArea)] <- 0
 training_data$GarageCars [is.na(training_data$GarageCars)] <- 0
-
-#summary(training_data$EnclosedPorch_group)
-#training_data %<>% mutate(logGrLivArea = log(GrLivArea))
-#training_data%>%skim
 training_data$MasVnrType %na<-% "None"
+training_data %<>% mutate(totalSF = training_data$`1stFlrSF` + training_data$`2ndFlrSF` + TotalBsmtSF)
+training_data %<>% mutate(MultipleFloor = if_else(training_data$`2ndFlrSF` >0,1,0))
+training_data %<>% mutate(logGrLivArea = log(GrLivArea))
 
-#training_data %<>% mutate(totalSF = training_data$`1stFlrSF` + training_data$`2ndFlrSF` + TotalBsmtSF)
-#training_data %<>% mutate(MultipleFloor = if_else(training_data$`2ndFlrSF` >0,1,0))
+training_data = training_data %>% 
+  mutate(RoofMatl = replace(RoofMatl, RoofMatl == "WdShake", "WdShngl")) %>%
+  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "AsphShn","AsbShng")) %>%
+  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "CBlock","CemntBd")) %>%
+  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "NONE","HdBoard")) %>%
+  mutate(Heating = replace(Heating, Heating == "Wall","GasW")) %>%
+  mutate(KitchenQual = replace(KitchenQual, KitchenQual == "NONE","TA")) %>%
+  mutate(Functional = replace(Functional, Functional == "NONE","Typ")) %>%
+  mutate(SaleType = replace(SaleType, SaleType == "Con","ConLw")) %>%
+  mutate(SaleType = replace(SaleType, SaleType == "Oth","WD")) %>%
+  mutate(SaleType = replace(SaleType, SaleType == "NONE","New")) %>%
+  mutate(WoodDeckSF_group = replace(WoodDeckSF_group, WoodDeckSF_group == "NONE","[0,100]")) %>%
+  mutate(OpenPorchSF_group = replace(OpenPorchSF_group, OpenPorchSF_group == "NONE","[0,50]")) %>%
+  mutate(EnclosedPorch_group = replace(EnclosedPorch_group, EnclosedPorch_group == 0,"[0,50]")) %>%
+  mutate(SalePrice = replace(SalePrice, SalePrice == "none",0)) %>%
+  mutate(SalePrice = as.numeric(SalePrice)) %>%
+  mutate(MSZoning = replace(MSZoning, MSZoning == "NONE","RL")) %>%
+  mutate(Condition2 = replace(MSZoning, MSZoning == "Feedr","Norm")) %>%
+  mutate(Condition2 = replace(MSZoning, MSZoning == "PosA","RRAn")) %>%
+  mutate(BsmtFullBath = if(BsmtFullBath==3) {BsmtFullBath == 2}) %>%
+  mutate(BsmtHalfBath = if(BsmtHalfBath==2){BsmtHalfBath == 1}) %>%
+  mutate(RoofStyle = replace(RoofStyle, RoofStyle == "Shed","Mansard")) %>%
+  mutate(SaleCondition = replace(SaleCondition, SaleCondition == "AdjLand","Normal")) %>%
+  mutate(ExterCond = replace(ExterCond, ExterCond == "Po","Fa"))
+  
 
-full_training <-training_data
-training_data%>%skim
-full_training%>%skim
 
-#set.seed(1)
-#TrainObs=sample(seq(1,dim(full_training)[1]), round(.75*dim(full_training)[1]), replace=FALSE)
+table(ames_test$SaleCondition)
+table(model_Test_Set$SaleCondition)
+training_data %<>% 
+  mutate(logGrLivArea = log(GrLivArea)) %>%
+  mutate(basement_y = if_else(TotalBsmtSF > 0,1,0))
+training_data %<>% mutate(Heating_y = if_else(!is.na(Heating),1,0))
+training_data %<>% mutate(HVAC = if_else((CentralAir == 1 || Heating == 1),1,0))
+training_data %<>% mutate(logTotalSF = log(totalSF))
 
-#ames_train=full_training[TrainObs,]
+drop<- c("PoolQC","MiscFeature", "Fence","FireplaceQu","Alley","Street" )
+training_data = training_data[,!(names(training_data) %in% drop)]
 
-
-
-SP<-"none"                
-Test_Set = training_data%>% filter(SalePrice %in% SP)
-Test_Set$SalePrice
-training_data$SalePrice
+training_data %<>% dplyr::select(1:6,8:10,13:15,17:19,21,25:27,29,47,48,55,67:79,83,84)
+names(training_data)
+SP<-0                
+model_Test_Set = training_data%>% filter(SalePrice %in% SP)
 training_data= training_data%>% filter(SalePrice %notin% SP)
 full_training <-training_data
+full_training$basement_y = as.factor(full_training$basement_y)
+full_training$FireplaceY = as.factor(full_training$FireplaceY)
+full_training$GarageTypeY = as.factor(full_training$GarageTypeY)
+full_training$GarageCars = as.numeric(full_training$GarageCars)
 
 testList = c(9,14,15,16,17,27,29,30,32,36,44,50,51,52,53,60,61,70,72,74,76,80,85,88,92,93,94,98,101,
              102,104,107,113,114,125,134,135,137,146,160,164,165,167,169,171,173,175,177,183,186,187,188,203,207,208,209,220,222,
@@ -654,9 +556,10 @@ testList = c(9,14,15,16,17,27,29,30,32,36,44,50,51,52,53,60,61,70,72,74,76,80,85
              1161,1164,1165,1168,1170,1172,1173,1174,1176,1182,1184,1187,1189,1207,1209,1212,1216,1217,1219,1233,1234,1235,1239,1240,1244,1252,1257,1262,1266,
              1269,1280,1283,1290,1294,1298,1301,1307,1311,1312,1313,1317,1320,1322,1323,1329,1334,1338,1342,1344,1347,1352,1355,1361,1363,1367,1370,1373,1376,
              1378,1381,1382,1384,1387,1403,1406,1412,1416,1424,1428,1435,1440,1441,1449,1452,1459) 
+
+#select variables
+
+
 ames_test = full_training %>% filter(Id %in% testList)
-
 ames_train = full_training %>% filter(Id %notin% testList)
-
-
-
+skim(ames_train)
