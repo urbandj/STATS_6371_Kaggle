@@ -14,17 +14,20 @@ library(mefa4)
 library(MASS)#studentized residuals
 library(caret)
 library(stats)
+install.packages('stats')
 drop<- c("Exterior2nd","BsmtFinSF2","ExterCond","GrLivArea", "logYearBuilt","GarageCars", "GarageCond","GarageQual", "porch_yn", "FireplaceY","GarageTypeY",
-         "porchArea", "BsmtFinType1", "OpenPorchSF_y","TotalBath","logGrLivArea", "logSalePrice","totalSF","TotalBsmtSF","ExterQual")
-full_training = full_training[,!(names(full_training) %in% drop)]
+         "porchArea", "BsmtFinType1", "OpenPorchSF_y","TotalBath","logGrLivArea", "logSalePrice","totalSF","TotalBsmtSF","ExterQual","pool_yn",
+         "PoolArea","WoodDeckSF","LotArea","X2ndFlrSF","Utilities","CentralAir")
 
-full_training=ame
+full_training = ames_train[,!(names(ames_train) %in% drop)]
+
+CV_test = ames_test[,!(names(ames_test) %in% drop)]
+predicttest = Test_Set[,!(names(Test_Set) %in% drop)]
 
 #Linearity Check----
 
-training_corr = full_training %>% 
-  dplyr::select(X1stFlrSF,       
-                X2ndFlrSF,      
+  training_corr = full_training %>% 
+  dplyr::select(       
                 X3SsnPorch,     
                 BedroomAbvGr4plus,       
                 BsmtFinSF1,     
@@ -35,18 +38,17 @@ training_corr = full_training %>%
                 Fireplaces,      
                 FullBath,     
                 GarageArea, 
-                logSalePrice, 
+                 
                 LowQualFinSF,    
                 MasVnrArea,         
                 MoSold,      
                 OpenPorchSF,        
-                OverallQual,           
-                PoolArea,         
+                OverallQual,          
                 SalePrice,           
-                TotalBsmtSF,   
+                   
                 TotRmsAbvGrd,      
                 TotRmsAbvGrd10plus,     
-                WoodDeckSF,    
+                  
                 YearBuilt,     
                 YrSold  )#select all quantitiative variables here
 
@@ -61,9 +63,10 @@ corrplot(corr_object, method = "number")#use this in write-up
 #Initial Model----
 options(max.print=999999)
 full.model <- lm(SalePrice ~., data = full_training)
-summary(full.model)
+summary(full.model)#9102
 vif(full.model)
 
+summary(aov(full.model))
 
 
 #'Remove Quant Variable due to high VIF
@@ -85,11 +88,10 @@ vif(full.model)
 
 
 #Remove High VIF Variables----
-full_training_noVIF <- full_training[ -c(1,18,42,43,45,64:66,69,76,79,82,86,88,91:95, 23,27,32,59,61)]
 
-full.model2 <- lm(logSalePrice ~., data = full_training_noVIF)
-summary(full.model2) #R^2 = 0.9252
-vif(full.model2)
+#full.model2 <- lm(logSalePrice ~., data = full_training_noVIF)
+#summary(full.model2) #R^2 = 0.9252
+#vif(full.model2)
 
 #Outlier Check----
 plot(full.model)
@@ -97,96 +99,112 @@ plot(full.model)
 ols_plot_cooksd_bar(full.model)
 
 #Outlier Removal----
-full_training_no <- full_training_noVIF[-c(617,389,437,514,146,617,256,664,883,1035),] 
-#cooks plot outliers - 427,314,1029,127,547
-full_training_no$BsmtFinType1 <- relevel(full_training_no$BsmtFinType1, ref = "None")
+full_training_no <- full_training[-c(617,883,389,514,256,1035),] 
+
 
 #Model outliers addressed----
 new_model = lm(SalePrice~., data = full_training_no)#interaction terms will need to be added here
-summary(new_model) #R^2 = 0.9361
+summary(new_model) #R^2 = 0.925
 vif(new_model)
 
 
 #Selection + Custom
 
 #Step
+
+
 stepAIC(new_model, direction = "both")
+stepmodel = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
+                 LotConfig + Neighborhood + Condition1 + Condition2 + BldgType + 
+                 OverallQual + OverallCond + YearBuilt + RoofMatl + Exterior1st + 
+                 MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + BsmtFinSF1 + 
+                 BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + `2ndFlrSF` + 
+                 BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + KitchenAbvGr + 
+                 KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
+                 GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
+                 SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+                 BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ames_test) 
+summary(stepmodel)#r^2=0.9264
+confint(stepmodel)
 
-stepmodel = lm(logSalePrice ~ MSSubClass + MSZoning + LotFrontage + 
-                 LotArea + Utilities + LotConfig + LandSlope + Neighborhood + 
-                 Condition1 + OverallQual + OverallCond + RoofMatl + Exterior1st + 
-                 Foundation + BsmtQual + BsmtExposure + BsmtFinSF1 + TotalBsmtSF + 
-                 Heating + HeatingQC + CentralAir + BsmtFullBath + FullBath + 
-                 HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + 
-                 Fireplaces + GarageType + GarageArea + PavedDrive + X3SsnPorch + 
-                 ScreenPorch + MiscVal + SaleCondition + WoodDeckSF_group + 
-                 pool_yn + MultipleFloor, data = full_training_no)
-
-summary(stepmodel)#r^2=0.9365
-
-
-
-
+skim(ames_test)
 #Forwards
+
 stepAIC(new_model, direction = "forward")
-forwards = lm(logSalePrice ~ MSSubClass + MSZoning + LotFrontage + 
-                LotArea + Street + LandContour + Utilities + LotConfig + 
-                LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + 
-                HouseStyle + OverallQual + OverallCond + YearRemodAdd + RoofStyle + 
-                RoofMatl + Exterior1st + MasVnrType + MasVnrArea + ExterQual + 
-                Foundation + BsmtQual + BsmtCond + BsmtExposure + BsmtFinSF1 + 
-                BsmtFinType2 + BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + 
-                HeatingQC + CentralAir + Electrical + LowQualFinSF + BsmtFullBath + 
-                BsmtHalfBath + FullBath + HalfBath + KitchenAbvGr + KitchenQual + 
-                TotRmsAbvGrd + Functional + Fireplaces + FireplaceQu + GarageType + 
-                GarageYrBlt + GarageFinish + GarageArea + GarageCond + PavedDrive + 
+forwards = lm(formula = SalePrice ~ Id + MSSubClass + MSZoning + LotFrontage + 
+                Street + LotShape + LandContour + LotConfig + LandSlope + 
+                Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
+                OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + 
+                RoofMatl + Exterior1st + MasVnrType + MasVnrArea + Foundation + 
+                BsmtQual + BsmtCond + BsmtExposure + BsmtFinSF1 + BsmtFinType2 + 
+                BsmtUnfSF + Heating + HeatingQC + Electrical + `1stFlrSF` + 
+                `2ndFlrSF` + LowQualFinSF + BsmtFullBath + BsmtHalfBath + 
+                FullBath + HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + 
+                Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + 
+                GarageFinish + GarageArea + PavedDrive + OpenPorchSF + EnclosedPorch + 
                 X3SsnPorch + ScreenPorch + Fence + MiscVal + MoSold + YrSold + 
-                SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
-                pool_yn + porchArea + X3SsnPorch_y + EnclosedPorch_y + ScreenPorch_y + 
-                BedroomAbvGr4plus + TotRmsAbvGrd10plus + MultipleFloor, data = full_training_no)
-summary(forwards)#r^2=0.9361
+                SaleType + SaleCondition + X3SsnPorch_y + EnclosedPorch_y + 
+                ScreenPorch_y + WoodDeckSF_group + OpenPorchSF_group + EnclosedPorch_group + 
+                BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = full_training_no)
+  
+  
+summary(forwards)#r^2=0.925
+confint(forwards)
 
 #Backwards
 b.step.model <- stepAIC(new_model, direction = "backward", 
                         trace = FALSE)
-summary(b.step.model)#r^2=0.9365
-
+summary(b.step.model)#r^2=0.9264
+confint(b.step.model)
 
 #Custom
-custom = lm(logSalePrice ~ MSSubClass + MSZoning + LotFrontage + 
-              LotArea + Utilities + LotConfig + LandSlope + Neighborhood + 
-              Condition1 + OverallQual + OverallCond + RoofMatl + Exterior1st + 
-              Foundation + BsmtQual + BsmtExposure + BsmtFinSF1 + TotalBsmtSF + 
-              Heating + HeatingQC + CentralAir + BsmtFullBath + FullBath + 
-              HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + Functional + 
-              Fireplaces + GarageType + GarageArea + PavedDrive + X3SsnPorch + 
-              ScreenPorch + MiscVal + SaleCondition + WoodDeckSF_group + 
-              pool_yn + MultipleFloor + Heating*CentralAir , data = full_training_no)
-
-summary(custom)#r^2=0.9724
+custom = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
+               Utilities + LotConfig + Neighborhood + Condition1 + Condition2 + 
+               BldgType + OverallQual + OverallCond + YearBuilt + RoofMatl + 
+               Exterior1st + MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + 
+               BsmtFinSF1 + BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + 
+               `2ndFlrSF` + BsmtFullBath + FullBath + HalfBath + KitchenAbvGr + 
+               KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
+               GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
+               SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+               BedroomAbvGr4plus + TotRmsAbvGrd10plus -Exterior1st,  data = full_training_no)
+summary(custom)#r^2=0.9267
 vif(stepmodel)
+confint(custom)
 
 #Assumption Check New Model----
+require(c('lindia','ggplot2','gridExtra'))
 
-assumptionPlots<-function(model, data){
-  require(c('lindia','ggplot2','gridExtra'))
-  
+assumptionPlots(full.model,full_training)
+assumptionPlots(stepmodel,full_training_no)
+assumptionPlots(forwards,full_training_no)
+assumptionPlots(b.step.model,full_training_no)
+assumptionPlots(custom,full_training_no)
+
+predictmodel = predict(stepmodel)
   # Histogram overlaid with kernel density curve
-  hist = ggplot(data, aes(x=predict(model))) + 
+gg_reshist(custom)
+                                     
+                                      colour="black", fill="white") +
+  geom_density(alpha=.2, fill="#FF6666") +
+  ggtitle("Distribution of Residuals") +
+  theme_bw()
+
+  ggplot(full_training_no, aes(x=predictmodel)) + 
     geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
-                   binwidth=.1,
+                   binwidth=.5,
                    colour="black", fill="white") +
     geom_density(alpha=.2, fill="#FF6666") +
     ggtitle("Distribution of Residuals") +
     theme_bw()
   
   #QQ-plot
-  qq = gg_qqplot(model, scale.factor = 1) +
+  gg_qqplot(custom, scale.factor = 1) +
     ggtitle("Residual QQ-Plot") +
     theme_bw()
   
   #reisidual Plot
-  residp = ggplot(model, aes(.fitted, .resid)) + 
+  ggplot(custom, aes(.fitted, .resid)) + 
     geom_point() + 
     geom_hline(yintercept=0, col="red", linetype="dashed") + 
     xlab("Fitted values") + 
@@ -195,7 +213,7 @@ assumptionPlots<-function(model, data){
     theme_bw()
   
   #standardized residual plots
-  sresidp = ggplot(model, aes(.fitted, .stdresid)) + 
+  ggplot(custom, aes(.fitted, .stdresid)) + 
     geom_point() + 
     geom_hline(yintercept=0, col="red", linetype="dashed") + 
     xlab("Fitted values") + 
@@ -203,17 +221,15 @@ assumptionPlots<-function(model, data){
     ggtitle("StdResid vs Fitted Plot") +
     theme_bw()+
     geom_hline(yintercept=c(-2,2),linetype="dashed")
-  
-  grid.arrange(residp, sresidp, hist, qq, nrow = 1)
-}
+
 
 #Leverage and Outlier Check---- 
 #Cooks
-cooksp = gg_cooksd(full.model2,label = TRUE, show.threshold = TRUE,
+gg_cooksd(full.model,label = TRUE, show.threshold = TRUE,
                    threshold = "convention", scale.factor = 0.2)
 
 #Leverage Plot
-leverage = ggplot(full.model2, aes(.hat, .stdresid))+geom_point(aes(size=.cooksd), na.rm=TRUE,show.legend = FALSE) +
+ggplot(full.model, aes(.hat, .stdresid))+geom_point(aes(size=.cooksd), na.rm=TRUE,show.legend = FALSE) +
   stat_smooth(method="loess", na.rm=TRUE) + 
   xlab("Leverage") + 
   ylab("Standardized Residuals") + 
@@ -222,36 +238,31 @@ leverage = ggplot(full.model2, aes(.hat, .stdresid))+geom_point(aes(size=.cooksd
 grid.arrange(cooksp, leverage, nrow = 1)
 
 #Model selection assupmtion checks----
-assumptionPlots(full.model2,full_training)
-assumptionPlots(stepmodel,full_training_no)
-assumptionPlots(forwards,full_training_no)
-assumptionPlots(b.step.model,full_training_no)
-assumptionPlots(custom,full_training_no)
+
 
 #model selection----
 #http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/154-stepwise-regression-essentials-in-r/
 
-
+levels(ames_test$Condition2)
+skim(ames_train)
 #Cross Validation----
 #Generate prediction
 cv <- function(model, data){
-  stepmodelpredict = predict(model,interval = "predict",newdata = data)
-  as.data.frame(stepmodelpredict)
+  stepmodelpredict = predict(stepmodel,interval = "predict",newdata = ames_test)
+  as_tibble(stepmodelpredict)
   
   #Find MSPE and check
-  MSPE = data.frame(Observed = data$logSalePrice, Predicted = stepmodelpredict)
+  MSPE = stepmodelpredictObserved = ames_test$SalePrice, Predicted = stepmodelpredict$fit)
   MSPE$Residual = MSPE$Observed -MSPE$Predicted.fit
   MSPE$SqauaredResidual = MSPE$Residual^2
   print("MSPE is: ")
   mean(MSPE$SqauaredResidual)
-  
-  
-}
-cv(stepmodel,full_training_no)
-cv(forwards,full_training_no)
-cv(b.step.model,full_training_no)
-cv(custom,full_training_no)
+}  
+cv(stepmodel,ames_test)
+cv(forwards,ames_test)
+cv(b.step.model,ames_test)
+cv(custom,ames_test)
 
-
+cv.lm(df = full_training_no,stepmodel, m =3)
 
 #Assumption Check on optimum model----
