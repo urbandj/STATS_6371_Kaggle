@@ -22,8 +22,8 @@ drop<- c("Exterior2nd","BsmtFinSF2","ExterCond","GrLivArea", "logYearBuilt","Gar
 full_training = ames_train[,!(names(ames_train) %in% drop)]
 
 CV_test = ames_test[,!(names(ames_test) %in% drop)]
-predicttest = Test_Set[,!(names(Test_Set) %in% drop)]
-
+ptest = Test_Set[,!(names(Test_Set) %in% drop)]
+as_tibble(ptest)
 #Linearity Check----
 
   training_corr = full_training %>% 
@@ -115,7 +115,7 @@ vif(new_model)
 
 stepAIC(new_model, direction = "both")
 stepmodel = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
-                 LotConfig + Neighborhood + Condition1 + Condition2 + BldgType + 
+                 LotConfig + Neighborhood + BldgType + 
                  OverallQual + OverallCond + YearBuilt + RoofMatl + Exterior1st + 
                  MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + BsmtFinSF1 + 
                  BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + `2ndFlrSF` + 
@@ -123,7 +123,7 @@ stepmodel = lm(SalePrice ~ MSSubClass + LotFrontage + Street +
                  KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
                  GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
                  SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
-                 BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ames_test) 
+                 BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ptest) 
 summary(stepmodel)#r^2=0.9264
 confint(stepmodel)
 
@@ -145,21 +145,31 @@ forwards = lm(formula = SalePrice ~ Id + MSSubClass + MSZoning + LotFrontage +
                 X3SsnPorch + ScreenPorch + Fence + MiscVal + MoSold + YrSold + 
                 SaleType + SaleCondition + X3SsnPorch_y + EnclosedPorch_y + 
                 ScreenPorch_y + WoodDeckSF_group + OpenPorchSF_group + EnclosedPorch_group + 
-                BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = full_training_no)
+                BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ptest)
   
   
 summary(forwards)#r^2=0.925
 confint(forwards)
 
 #Backwards
-b.step.model <- stepAIC(new_model, direction = "backward", 
+stepAIC(new_model, direction = "backward", 
                         trace = FALSE)
+b.step.model <- lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
+  LotConfig + Neighborhood + Condition1 + Condition2 + BldgType + 
+  OverallQual + OverallCond + YearBuilt + RoofMatl + Exterior1st + 
+  MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + BsmtFinSF1 + 
+  BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + `2ndFlrSF` + 
+  BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + KitchenAbvGr + 
+  KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
+  GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
+  SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+  BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ptest)
 summary(b.step.model)#r^2=0.9264
 confint(b.step.model)
 
 #Custom
 custom = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
-               Utilities + LotConfig + Neighborhood + Condition1 + Condition2 + 
+                LotConfig + Neighborhood +
                BldgType + OverallQual + OverallCond + YearBuilt + RoofMatl + 
                Exterior1st + MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + 
                BsmtFinSF1 + BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + 
@@ -167,7 +177,7 @@ custom = lm(SalePrice ~ MSSubClass + LotFrontage + Street +
                KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
                GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
                SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
-               BedroomAbvGr4plus + TotRmsAbvGrd10plus -Exterior1st,  data = full_training_no)
+               BedroomAbvGr4plus + TotRmsAbvGrd10plus -Exterior1st,  data = ptest)
 summary(custom)#r^2=0.9267
 vif(stepmodel)
 confint(custom)
@@ -244,20 +254,21 @@ grid.arrange(cooksp, leverage, nrow = 1)
 #http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/154-stepwise-regression-essentials-in-r/
 
 levels(ames_test$Condition2)
-skim(ames_train)
+skim(ames_test)
 #Cross Validation----
 #Generate prediction
-cv <- function(model, data){
-  stepmodelpredict = predict(stepmodel,interval = "predict",newdata = ames_test)
-  as_tibble(stepmodelpredict)
+
+  stepmodelpredict = predict(custom,interval = "predict",newdata = CV_test)
+  as.data.frame(stepmodelpredict)
   
   #Find MSPE and check
-  MSPE = stepmodelpredictObserved = ames_test$SalePrice, Predicted = stepmodelpredict$fit)
-  MSPE$Residual = MSPE$Observed -MSPE$Predicted.fit
+  MSPE = data.frame(Observed = CV_test$SalePrice, Predicted = stepmodelpredict[,1])
+  MSPE$Observed=as.numeric(as.character(MSPE$Observed))
+  MSPE$Residual = MSPE$Observed - MSPE$Predicted
   MSPE$SqauaredResidual = MSPE$Residual^2
   print("MSPE is: ")
   mean(MSPE$SqauaredResidual)
-}  
+
 cv(stepmodel,ames_test)
 cv(forwards,ames_test)
 cv(b.step.model,ames_test)
@@ -266,3 +277,54 @@ cv(custom,ames_test)
 cv.lm(df = full_training_no,stepmodel, m =3)
 
 #Assumption Check on optimum model----
+ptest = as_tibble(ptest)
+ptest=ptest%>% mutate(SalePrice = if_else(SalePrice =="none",NA,0))
+
+
+
+SalePriceSW = predict(stepmodel,newdata = ptest )
+sw_kaggle = cbind(ptest,SalePriceSW)
+sw_kaggle = ptest %>% dplyr::select(Id, SalePrice) %>%
+  mutate(SalePrice = SalePriceSW )
+
+cbind(ptest,SalePricep)
+custom_kaggle = ptest %>% dplyr::select(Id, SalePrice) %>%
+  mutate(SalePrice = SalePricep )
+
+SalePriceb= predict(b.step.model,newdata = ptest)
+back_kaggle = cbind(ptest,SalePriceb)
+back_kaggle = ptest %>% dplyr::select(Id, SalePrice) %>%
+  mutate(SalePrice = SalePricef )
+
+write.csv(custom_kaggle, file = "custom_kaggle.csv")
+write.csv(sw, file = "sw_kaggle.csv")
+
+
+
+ptest = ptest %>% 
+  mutate(RoofMatl = replace(RoofMatl, RoofMatl == "WdShake", "WdShngl")) %>%
+  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "AsphShn","AsbShng")) %>%
+  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "CBlock","CemntBd")) %>%
+  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "NONE","HdBoard")) %>%
+  mutate(Heating = replace(Heating, Heating == "Wall","GasW")) %>%
+  mutate(KitchenQual = replace(KitchenQual, KitchenQual == "NONE","TA")) %>%
+  mutate(Functional = replace(Functional, Functional == "NONE","Typ")) %>%
+  mutate(SaleType = replace(SaleType, SaleType == "Con","ConLw")) %>%
+  mutate(SaleType = replace(SaleType, SaleType == "Oth","WD")) %>%
+  mutate(SaleType = replace(SaleType, SaleType == "NONE","New")) %>%
+  mutate(WoodDeckSF_group = replace(WoodDeckSF_group, WoodDeckSF_group == "NONE","[0,100]")) %>%
+  mutate(OpenPorchSF_group = replace(OpenPorchSF_group, OpenPorchSF_group == "NONE","[0,50]")) %>%
+  mutate(SalePrice = replace(SalePrice, SalePrice == "none",0)) %>%
+  mutate(SalePrice = as.numeric(SalePrice)) %>%
+  mutate(MSZoning = replace(MSZoning, MSZoning == "NONE","RL")) %>%
+  mutate(Condition2 = replace(MSZoning, MSZoning == "Feedr","Norm")) %>%
+  mutate(Condition2 = replace(MSZoning, MSZoning == "PosA","RRAn")) %>%
+  mutate(BsmtFullBath = if(BsmtFullBath==3) {BsmtFullBath == 2}) %>%
+  mutate(BsmtHalfBath = if(BsmtHalfBath==2){BsmtHalfBath == 1})
+  
+
+
+skim(ptest)
+
+table(ptest$BsmtHalfBath)
+table(ames_test$BsmtHalfBath)
