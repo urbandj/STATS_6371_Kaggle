@@ -20,7 +20,7 @@ require(readr)
 train<- read.csv("c:/Users/daj0079/Desktop/SMU/train.csv")
 testing<- read.csv("c:/Users/daj0079/Desktop/SMU/test.csv")
 
-testing[["test_col"]]<-"test"
+
 testing[["SalePrice"]]<-"none"
 
 training_data<-rbind(train,testing)
@@ -615,7 +615,7 @@ training_data$WoodDeckSF_group[is.na(training_data$WoodDeckSF_group)] <- "NONE"
 training_data$GarageArea [is.na(training_data$GarageArea)] <- 0
 training_data$GarageCars [is.na(training_data$GarageCars)] <- 0
 
-summary(training_data$EnclosedPorch_group)
+#summary(training_data$EnclosedPorch_group)
 #training_data %<>% mutate(logGrLivArea = log(GrLivArea))
 #training_data%>%skim
 training_data$MasVnrType %na<-% "None"
@@ -633,8 +633,7 @@ full_training%>%skim
 #ames_train=full_training[TrainObs,]
 
 
-Test_Set<-split(training_data, training_data$SalePrice)
-                
+
 SP<-"none"                
 Test_Set = training_data%>% filter(SalePrice %in% SP)
 Test_Set$SalePrice
@@ -658,7 +657,6 @@ testList = c(9,14,15,16,17,27,29,30,32,36,44,50,51,52,53,60,61,70,72,74,76,80,85
 ames_test = full_training %>% filter(Id %in% testList)
 
 ames_train = full_training %>% filter(Id %notin% testList)
-ames_train$sal
 
-skim(ames_train)
-train$PoolArea
+
+
