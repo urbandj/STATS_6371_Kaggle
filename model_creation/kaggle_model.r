@@ -1,56 +1,29 @@
-#libraries----
-install.packages(c("skimr","tangram","fastDummies",'olsrr','rlang','forcats','roperators','stats'))
+install.packages(c("skimr","tangram",'olsrr','rlang','forcats','roperators','stats'))
 library(tidyverse) #general data wrangling tools
 library(skimr) #summary stats
-library(tangram) #has is.categorical() function, useful for creating tables
+library(corrplot)
+library(MASS)#studentized residuals
+library(lindia)
+library(ggplot)
 library(car) # Regression tools
-library(fastDummies) # creates dummy variables
 library(rlang)
 library(olsrr)
 library(forcats) 
 library(roperators)
-library(corrplot)
+library(gridExtra)
 library(mefa4)
-library(MASS)#studentized residuals
-library(caret)
 library(stats)
-install.packages('stats')
-drop<- c("Exterior2nd","BsmtFinSF2","ExterCond","GrLivArea", "logYearBuilt","GarageCars", "GarageCond","GarageQual", "porch_yn", "FireplaceY","GarageTypeY",
-         "porchArea", "BsmtFinType1", "OpenPorchSF_y","TotalBath","logGrLivArea", "logSalePrice","totalSF","TotalBsmtSF","ExterQual","pool_yn",
-         "PoolArea","WoodDeckSF","LotArea","X2ndFlrSF","Utilities","CentralAir")
 
-full_training = ames_train[,!(names(ames_train) %in% drop)]
 
-CV_test = ames_test[,!(names(ames_test) %in% drop)]
-ptest = Test_Set[,!(names(Test_Set) %in% drop)]
-as_tibble(ptest)
+full_training = training_data
+
+drop<- c("Id")
+full_training = full_training[,!(names(full_training) %in% drop)]
+skim(full_training)
 #Linearity Check----
 
-  training_corr = full_training %>% 
-  dplyr::select(       
-                X3SsnPorch,     
-                BedroomAbvGr4plus,       
-                BsmtFinSF1,     
-                BsmtFullBath,     
-                BsmtHalfBath,       
-                BsmtUnfSF,      
-                EnclosedPorch,             
-                Fireplaces,      
-                FullBath,     
-                GarageArea, 
-                 
-                LowQualFinSF,    
-                MasVnrArea,         
-                MoSold,      
-                OpenPorchSF,        
-                OverallQual,          
-                SalePrice,           
-                   
-                TotRmsAbvGrd,      
-                TotRmsAbvGrd10plus,     
-                  
-                YearBuilt,     
-                YrSold  )#select all quantitiative variables here
+training_corr = full_training %>% 
+  dplyr::select(YearBuilt,YrSold,SalePrice,logGrLivArea,logTotalSF)#select all quantitiative variables here
 
 training_corr%>% skim
 sum(is.na(full_training))
@@ -58,185 +31,141 @@ sum(is.na(full_training))
 corr_object = cor(training_corr)
 corrplot(corr_object, method = "number")#use this in write-up
 
-
-
 #Initial Model----
 options(max.print=999999)
 full.model <- lm(SalePrice ~., data = full_training)
-summary(full.model)#9102
+summary(full.model)#.8487
 vif(full.model)
 
-summary(aov(full.model))
-
-
-#'Remove Quant Variable due to high VIF
-#'YearBuilt  97754.0000
-#'`1stFlrSF` 42.8860
-#'`2ndFlrSF` 41.1500
-#'WoodDeckSF  21.9280    
-#' OpenPorchSF 14.8880
-#' EnclosedPorch  47.1830 
-#'  PoolArea 111.7800 
-#'  logYearBuilt 96023.0000
-#'  logGrLivArea 54.2760
-#'  porch_yn due to multicolinearity NA in output
-#'  OpenPorchSF_y due to multicolinearity NA in output
-#'  totalbath due to multicolinearity NA in output
-#'  FireplaceY due to multicolinearity NA in output                           
-#'  GarageTypeY due to multicolinearity NA in output                      
-#'  totalSF due to multicolinearity NA in output  
-
-
-#Remove High VIF Variables----
-
-#full.model2 <- lm(logSalePrice ~., data = full_training_noVIF)
-#summary(full.model2) #R^2 = 0.9252
-#vif(full.model2)
-
 #Outlier Check----
-plot(full.model)
 
+plot(full.model)
 ols_plot_cooksd_bar(full.model)
 
+
 #Outlier Removal----
-full_training_no <- full_training[-c(617,883,389,514,256,1035),] 
+full_training_no <- full_training[-c(108,314,589,770,692,1183,1299,186,524,899,1183,1170,1212,1181,1169,804),] 
 
 
 #Model outliers addressed----
 new_model = lm(SalePrice~., data = full_training_no)#interaction terms will need to be added here
-summary(new_model) #R^2 = 0.925
+summary(new_model) #R^2 = 0.8896
 vif(new_model)
 
-
-#Selection + Custom
-
-#Step
-
-
+#Model Selection----
+#Step Selection----
 stepAIC(new_model, direction = "both")
-stepmodel = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
-                 LotConfig + Neighborhood + BldgType + 
-                 OverallQual + OverallCond + YearBuilt + RoofMatl + Exterior1st + 
-                 MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + BsmtFinSF1 + 
-                 BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + `2ndFlrSF` + 
-                 BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + KitchenAbvGr + 
-                 KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
-                 GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
-                 SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
-                 BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ptest) 
-summary(stepmodel)#r^2=0.9264
-confint(stepmodel)
+stepmodel = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LandContour + 
+                 LotConfig + LandSlope + Neighborhood + BldgType + HouseStyle + 
+                 OverallQual + YearBuilt + Exterior1st + ExterQual + ExterCond + 
+                 KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
+                 WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
+                 TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y, data = full_training_no)
+summary(stepmodel) #.8871
+stepmodel_cv = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LandContour + 
+                    LotConfig + LandSlope + Neighborhood + BldgType + HouseStyle + 
+                    OverallQual + YearBuilt + Exterior1st + ExterQual + ExterCond + 
+                    KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
+                    WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
+                    TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y, data = ames_test)
 
-skim(ames_test)
-#Forwards
-
+#Forward Selection----
 stepAIC(new_model, direction = "forward")
-forwards = lm(formula = SalePrice ~ Id + MSSubClass + MSZoning + LotFrontage + 
-                Street + LotShape + LandContour + LotConfig + LandSlope + 
-                Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
-                OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + 
-                RoofMatl + Exterior1st + MasVnrType + MasVnrArea + Foundation + 
-                BsmtQual + BsmtCond + BsmtExposure + BsmtFinSF1 + BsmtFinType2 + 
-                BsmtUnfSF + Heating + HeatingQC + Electrical + `1stFlrSF` + 
-                `2ndFlrSF` + LowQualFinSF + BsmtFullBath + BsmtHalfBath + 
-                FullBath + HalfBath + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + 
-                Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + 
-                GarageFinish + GarageArea + PavedDrive + OpenPorchSF + EnclosedPorch + 
-                X3SsnPorch + ScreenPorch + Fence + MiscVal + MoSold + YrSold + 
-                SaleType + SaleCondition + X3SsnPorch_y + EnclosedPorch_y + 
-                ScreenPorch_y + WoodDeckSF_group + OpenPorchSF_group + EnclosedPorch_group + 
-                BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ptest)
-  
-  
-summary(forwards)#r^2=0.925
-confint(forwards)
-
-#Backwards
-stepAIC(new_model, direction = "backward", 
-                        trace = FALSE)
-b.step.model <- lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
-  LotConfig + Neighborhood + Condition1 + Condition2 + BldgType + 
-  OverallQual + OverallCond + YearBuilt + RoofMatl + Exterior1st + 
-  MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + BsmtFinSF1 + 
-  BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + `2ndFlrSF` + 
-  BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + KitchenAbvGr + 
-  KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
-  GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
-  SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
-  BedroomAbvGr4plus + TotRmsAbvGrd10plus, data = ptest)
-summary(b.step.model)#r^2=0.9264
-confint(b.step.model)
-
-#Custom
-custom = lm(SalePrice ~ MSSubClass + LotFrontage + Street + 
-                LotConfig + Neighborhood +
-               BldgType + OverallQual + OverallCond + YearBuilt + RoofMatl + 
-               Exterior1st + MasVnrType + MasVnrArea + BsmtQual + BsmtExposure + 
-               BsmtFinSF1 + BsmtFinType2 + BsmtUnfSF + Heating + `1stFlrSF` + 
-               `2ndFlrSF` + BsmtFullBath + FullBath + HalfBath + KitchenAbvGr + 
-               KitchenQual + TotRmsAbvGrd + Functional + Fireplaces + GarageType + 
-               GarageYrBlt + GarageArea + OpenPorchSF + ScreenPorch + MiscVal + 
+forward = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
+               LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
+               BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
+               RoofStyle + Exterior1st + ExterQual + ExterCond + Foundation + 
+               KitchenAbvGr + KitchenQual + GarageCars + MoSold + YrSold + 
                SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
-               BedroomAbvGr4plus + TotRmsAbvGrd10plus -Exterior1st,  data = ptest)
-summary(custom)#r^2=0.9267
-vif(stepmodel)
-confint(custom)
+               EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
+               FireplaceY + GarageTypeY + logGrLivArea + basement_y, data = full_training_no)
+summary(forward)#.8894
+forward_cv = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
+                  LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
+                  BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
+                  RoofStyle + Exterior1st + ExterQual + ExterCond + Foundation + 
+                  KitchenAbvGr + KitchenQual + GarageCars + MoSold + YrSold + 
+                  SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+                  EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
+                  FireplaceY + GarageTypeY + logGrLivArea + basement_y, data = ames_test)
+#Backward Selection----
+stepAIC(new_model, direction = "backward")
+backward = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LandContour + 
+                LotConfig + LandSlope + Neighborhood + BldgType + HouseStyle + 
+                OverallQual + YearBuilt + Exterior1st + ExterQual + ExterCond + 
+                KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
+                WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
+                TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y, data = full_training_no)
+summary(backward)#0.8871
+backward_cv = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LandContour + 
+                   LotConfig + LandSlope + Neighborhood + BldgType + HouseStyle + 
+                   OverallQual + YearBuilt + Exterior1st + ExterQual + ExterCond + 
+                   KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
+                   WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
+                   TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y,data = ames_test)
+#Custom Model----
 
+custom = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
+              LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
+              BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
+              RoofStyle + Exterior1st + ExterQual + ExterCond + Foundation + 
+              KitchenAbvGr + KitchenQual + GarageCars + MoSold + YrSold + 
+              SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+              EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
+              FireplaceY + GarageTypeY + logGrLivArea + basement_y + logGrLivArea*OverallQual, data = full_training_no)
+summary(custom)#0.9043
+
+
+custom_cv = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
+                 LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
+                 BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
+                 RoofStyle + Exterior1st + ExterQual + ExterCond + Foundation + 
+                 KitchenAbvGr + KitchenQual + GarageCars + MoSold + YrSold + 
+                 SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
+                 EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
+                 FireplaceY + GarageTypeY + logGrLivArea + basement_y+ logGrLivArea*OverallQual +,data = ames_test)
+skim(full_training_no)
+#AssumptionChecks----
 #Assumption Check New Model----
-require(c('lindia','ggplot2','gridExtra'))
-
-assumptionPlots(full.model,full_training)
-assumptionPlots(stepmodel,full_training_no)
-assumptionPlots(forwards,full_training_no)
-assumptionPlots(b.step.model,full_training_no)
-assumptionPlots(custom,full_training_no)
-
 predictmodel = predict(stepmodel)
-  # Histogram overlaid with kernel density curve
+# Histogram overlaid with kernel density curve
 gg_reshist(custom)
-                                     
-                                      colour="black", fill="white") +
+
+ggplot(full_training_no, aes(x=predictmodel)) + 
+  geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                 binwidth=.5,
+                 colour="black", fill="white") +
   geom_density(alpha=.2, fill="#FF6666") +
   ggtitle("Distribution of Residuals") +
   theme_bw()
 
-  ggplot(full_training_no, aes(x=predictmodel)) + 
-    geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
-                   binwidth=.5,
-                   colour="black", fill="white") +
-    geom_density(alpha=.2, fill="#FF6666") +
-    ggtitle("Distribution of Residuals") +
-    theme_bw()
-  
-  #QQ-plot
-  gg_qqplot(custom, scale.factor = 1) +
-    ggtitle("Residual QQ-Plot") +
-    theme_bw()
-  
-  #reisidual Plot
-  ggplot(custom, aes(.fitted, .resid)) + 
-    geom_point() + 
-    geom_hline(yintercept=0, col="red", linetype="dashed") + 
-    xlab("Fitted values") + 
-    ylab("Residuals") + 
-    ggtitle("Residual vs Fitted Plot") +
-    theme_bw()
-  
-  #standardized residual plots
-  ggplot(custom, aes(.fitted, .stdresid)) + 
-    geom_point() + 
-    geom_hline(yintercept=0, col="red", linetype="dashed") + 
-    xlab("Fitted values") + 
-    ylab("Studentized Residuals") + 
-    ggtitle("StdResid vs Fitted Plot") +
-    theme_bw()+
-    geom_hline(yintercept=c(-2,2),linetype="dashed")
+#QQ-plot
+gg_qqplot(custom, scale.factor = 1) +
+  ggtitle("Residual QQ-Plot") +
+  theme_bw()
 
+#reisidual Plot
+ggplot(custom, aes(.fitted, .resid)) + 
+  geom_point() + 
+  geom_hline(yintercept=0, col="red", linetype="dashed") + 
+  xlab("Fitted values") + 
+  ylab("Residuals") + 
+  ggtitle("Residual vs Fitted Plot") +
+  theme_bw()
 
+#standardized residual plots
+ggplot(custom, aes(.fitted, .stdresid)) + 
+  geom_point() + 
+  geom_hline(yintercept=0, col="red", linetype="dashed") + 
+  xlab("Fitted values") + 
+  ylab("Studentized Residuals") + 
+  ggtitle("StdResid vs Fitted Plot") +
+  theme_bw()+
+  geom_hline(yintercept=c(-2,2),linetype="dashed")
 #Leverage and Outlier Check---- 
 #Cooks
 gg_cooksd(full.model,label = TRUE, show.threshold = TRUE,
-                   threshold = "convention", scale.factor = 0.2)
+          threshold = "convention", scale.factor = 0.2)
 
 #Leverage Plot
 ggplot(full.model, aes(.hat, .stdresid))+geom_point(aes(size=.cooksd), na.rm=TRUE,show.legend = FALSE) +
@@ -247,84 +176,52 @@ ggplot(full.model, aes(.hat, .stdresid))+geom_point(aes(size=.cooksd), na.rm=TRU
   theme_bw()
 grid.arrange(cooksp, leverage, nrow = 1)
 
-#Model selection assupmtion checks----
+#Cross Validation
+crossVal <-function(model,modelData){
+stepmodelpredict = predict(model,interval = "predict",newdata = modelData)
+as.data.frame(stepmodelpredict)
 
+#Find MSPE and check
+MSPE = data.frame(Observed = modelData$SalePrice, Predicted = stepmodelpredict[,1])
+MSPE$Observed=as.numeric(as.character(MSPE$Observed))
+MSPE$Residual = MSPE$Observed - MSPE$Predicted
+MSPE$SqauaredResidual = MSPE$Residual^2
+print("MSPE is: ")
+mean(MSPE$SqauaredResidual)
+}
 
-#model selection----
-#http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/154-stepwise-regression-essentials-in-r/
+crossVal(stepmodel_cv,ames_test)
+crossVal(forward_cv,ames_test)
+crossVal(backward_cv,ames_test)
+crossVal(custom_cv,ames_test)
 
-levels(ames_test$Condition2)
-skim(ames_test)
-#Cross Validation----
-#Generate prediction
-
-  stepmodelpredict = predict(custom,interval = "predict",newdata = CV_test)
-  as.data.frame(stepmodelpredict)
-  
-  #Find MSPE and check
-  MSPE = data.frame(Observed = CV_test$SalePrice, Predicted = stepmodelpredict[,1])
-  MSPE$Observed=as.numeric(as.character(MSPE$Observed))
-  MSPE$Residual = MSPE$Observed - MSPE$Predicted
-  MSPE$SqauaredResidual = MSPE$Residual^2
-  print("MSPE is: ")
-  mean(MSPE$SqauaredResidual)
-
-cv(stepmodel,ames_test)
-cv(forwards,ames_test)
-cv(b.step.model,ames_test)
-cv(custom,ames_test)
-
-cv.lm(df = full_training_no,stepmodel, m =3)
-
-#Assumption Check on optimum model----
-ptest = as_tibble(ptest)
-ptest=ptest%>% mutate(SalePrice = if_else(SalePrice =="none",NA,0))
-
-
-
-SalePriceSW = predict(stepmodel,newdata = ptest )
-sw_kaggle = cbind(ptest,SalePriceSW)
-sw_kaggle = ptest %>% dplyr::select(Id, SalePrice) %>%
+#Predict----
+#Stepwise Predict
+SalePriceSW = predict(stepmodel,newdata = model_Test_Set )
+sw_kaggle = cbind(model_Test_Set,SalePriceSW)
+sw_kaggle = model_Test_Set %>% dplyr::select(Id, SalePrice) %>%
   mutate(SalePrice = SalePriceSW )
 
-cbind(ptest,SalePricep)
-custom_kaggle = ptest %>% dplyr::select(Id, SalePrice) %>%
-  mutate(SalePrice = SalePricep )
+#Forwards Predict #ERROR
+SalePricef = predict(forward,newdata = model_Test_Set )
+f_kaggle = cbind(model_Test_Set,SalePricef)
+forward_kaggle = model_Test_Set %>% dplyr::select(Id, SalePrice) %>%
+  mutate(SalePrice = SalePricef)
 
-SalePriceb= predict(b.step.model,newdata = ptest)
-back_kaggle = cbind(ptest,SalePriceb)
-back_kaggle = ptest %>% dplyr::select(Id, SalePrice) %>%
-  mutate(SalePrice = SalePricef )
 
+#Backwards predict
+SalePriceb= predict(backward,newdata = model_Test_Set)
+back_kaggle = cbind(model_Test_Set,SalePriceb)
+back_kaggle = model_Test_Set %>% dplyr::select(Id, SalePrice) %>%
+  mutate(SalePrice = SalePriceb )
+
+#Custom
+SalePricec= predict(custom_cv,newdata = model_Test_Set)
+custom_kaggle = cbind(model_Test_Set,SalePricec)
+custom_kaggle = model_Test_Set %>% dplyr::select(Id, SalePrice) %>%
+  mutate(SalePrice = SalePricec)
+
+write.csv(sw_kaggle, file = "sw_kaggle.csv")
+write.csv(f_kaggle, file = "f_kaggle.csv")
+write.csv(back_kaggle, file = "back_kaggle.csv")
 write.csv(custom_kaggle, file = "custom_kaggle.csv")
-write.csv(sw, file = "sw_kaggle.csv")
-
-
-
-ptest = ptest %>% 
-  mutate(RoofMatl = replace(RoofMatl, RoofMatl == "WdShake", "WdShngl")) %>%
-  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "AsphShn","AsbShng")) %>%
-  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "CBlock","CemntBd")) %>%
-  mutate(Exterior1st = replace(Exterior1st, Exterior1st == "NONE","HdBoard")) %>%
-  mutate(Heating = replace(Heating, Heating == "Wall","GasW")) %>%
-  mutate(KitchenQual = replace(KitchenQual, KitchenQual == "NONE","TA")) %>%
-  mutate(Functional = replace(Functional, Functional == "NONE","Typ")) %>%
-  mutate(SaleType = replace(SaleType, SaleType == "Con","ConLw")) %>%
-  mutate(SaleType = replace(SaleType, SaleType == "Oth","WD")) %>%
-  mutate(SaleType = replace(SaleType, SaleType == "NONE","New")) %>%
-  mutate(WoodDeckSF_group = replace(WoodDeckSF_group, WoodDeckSF_group == "NONE","[0,100]")) %>%
-  mutate(OpenPorchSF_group = replace(OpenPorchSF_group, OpenPorchSF_group == "NONE","[0,50]")) %>%
-  mutate(SalePrice = replace(SalePrice, SalePrice == "none",0)) %>%
-  mutate(SalePrice = as.numeric(SalePrice)) %>%
-  mutate(MSZoning = replace(MSZoning, MSZoning == "NONE","RL")) %>%
-  mutate(Condition2 = replace(MSZoning, MSZoning == "Feedr","Norm")) %>%
-  mutate(Condition2 = replace(MSZoning, MSZoning == "PosA","RRAn")) %>%
-  mutate(BsmtFullBath = if(BsmtFullBath==3) {BsmtFullBath == 2}) %>%
-  mutate(BsmtHalfBath = if(BsmtHalfBath==2){BsmtHalfBath == 1})
-  
-
-
-skim(ptest)
-
-table(ptest$BsmtHalfBath)
-table(ames_test$BsmtHalfBath)
