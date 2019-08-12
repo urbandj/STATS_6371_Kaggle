@@ -633,9 +633,14 @@ full_training%>%skim
 #ames_train=full_training[TrainObs,]
 
 
-Test_Set<-filter(id%in%1461:2919)
-
+Test_Set<-split(training_data, training_data$SalePrice)
+                
+SP<-"none"                
+Test_Set = training_data%>% filter(SalePrice %in% SP)
+Test_Set$SalePrice
 training_data$SalePrice
+training_data= training_data%>% filter(SalePrice %notin% SP)
+full_training <-training_data
 
 testList = c(9,14,15,16,17,27,29,30,32,36,44,50,51,52,53,60,61,70,72,74,76,80,85,88,92,93,94,98,101,
              102,104,107,113,114,125,134,135,137,146,160,164,165,167,169,171,173,175,177,183,186,187,188,203,207,208,209,220,222,
@@ -657,4 +662,3 @@ ames_train$sal
 
 skim(ames_train)
 train$PoolArea
-
