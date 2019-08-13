@@ -71,6 +71,23 @@ stepmodel_cv = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig +
 
 #Forward Selection----
 stepAIC(new_model, direction = "forward")
+stepmodel = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig + 
+                 LandSlope + Neighborhood + BldgType + HouseStyle + OverallQual + 
+                 YearBuilt + Exterior1st + ExterQual + ExterCond + BsmtCond + 
+                 KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
+                 WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
+                 TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y, data = full_training_no)
+
+summary(stepmodel) #.8877
+stepmodel_cv = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig + 
+                    LandSlope + Neighborhood + BldgType + HouseStyle + OverallQual + 
+                    YearBuilt + Exterior1st + ExterQual + ExterCond + BsmtCond + 
+                    KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
+                    WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
+                    TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y, data = ames_test)
+
+#Forward Selection----
+stepAIC(new_model, direction = "forward")
 forward = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
                LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
                BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
@@ -88,6 +105,8 @@ forward_cv = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage +
                   YrSold + SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
                   EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
                   FireplaceY + GarageTypeY + logGrLivArea + basement_y, data = ames_test)
+
+
 #Backward Selection----
 stepAIC(new_model, direction = "backward")
 backward = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig + 
@@ -96,7 +115,7 @@ backward = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig +
                 KitchenAbvGr + KitchenQual + GarageCars + MoSold + SaleCondition + 
                 WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
                 TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y, data = full_training_no)
-summary(backward)#0.8872
+summary(backward)#0.8877
 backward_cv = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig + 
                    LandSlope + Neighborhood + BldgType + HouseStyle + OverallQual + 
                    YearBuilt + Exterior1st + ExterQual + ExterCond + BsmtCond + 
@@ -104,7 +123,7 @@ backward_cv = lm(SalePrice ~ MSZoning + LotFrontage + LotArea + LotConfig +
                    WoodDeckSF_group + OpenPorchSF_group + TotalBath + BedroomAbvGr4plus + 
                    TotRmsAbvGrd10plus + FireplaceY + logGrLivArea + basement_y,data = ames_test)
 #Custom Model----
-
+full_training_no$OverallQual=as.factor(full_training_no$OverallQual)
 custom = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
               LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
               BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
@@ -113,9 +132,9 @@ custom = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage +
               YrSold + SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
               EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
               FireplaceY + GarageTypeY + logGrLivArea + basement_y + logGrLivArea*OverallQual, data = full_training_no)
-summary(custom)#0.905
-
-
+summary(custom)#0.9098
+skim(ames_test)
+ames_test$garageCars = as.factor(ames_test$garageCars)
 custom_cv = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage + 
                  LotArea + LandContour + LotConfig + LandSlope + Neighborhood + 
                  BldgType + HouseStyle + OverallQual + YearBuilt + YearRemodAdd + 
@@ -124,6 +143,7 @@ custom_cv = lm(SalePrice ~ MSSubClass + MSZoning + LotFrontage +
                  YrSold + SaleType + SaleCondition + WoodDeckSF_group + OpenPorchSF_group + 
                  EnclosedPorch_group + TotalBath + BedroomAbvGr4plus + TotRmsAbvGrd10plus + 
                  FireplaceY + GarageTypeY + logGrLivArea + basement_y + logGrLivArea*OverallQual,data = ames_test)
+
 skim(full_training_no)
 #AssumptionChecks----
 #Assumption Check New Model----
